@@ -32,9 +32,13 @@ float GPS_speed;//11.
 float CMD_time;//12.
 float CMD_count;//13.
 unsigned int ServoPos; //14
-unsigned int state;
+unsigned int state = 0;
 
-float all_data [13]; //just to store all data for manipulation ease
+//Sub variables
+byte voltage1, voltage2;
+unsigned long daytime;
+unsigned long Missionstarttime;
+unsigned long currtime;
 
 
 
@@ -59,7 +63,7 @@ void loop(){
   //Collect_Sensor_Data();
   Collect_Slave_Data();
   
-  //2. Preform State-specific functions
+ /* //2. Preform State-specific functions
   switch (state){
     case 0:
       //initialize();
@@ -84,14 +88,15 @@ void loop(){
       break;
     default:
       //boot();
-  }
+  }*/
 
   //3. Save State to memory
   //saveState();
   
   //4. Transmit and Save data to SD.
-      //packetID
-     //Transmit_data();
+      delay (1000);
+      ++packetID;
+      Transmit_data();
      //Store_Data_inSD();
    
   //5. Perform Radio data task

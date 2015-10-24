@@ -11,11 +11,9 @@ void receiveEvent(int numBytes) {
 * Data = [voltage, LAT, Long, Alt, SatNum, GPSSpeed, Servopos]
 */
 void requestEvent() {
-  readBUSVoltage(&voltage);
-  data[0] = voltage;
-  for (int i=0; i<=sizeof(data); ++i){
-    Wire.write(data[i]);  //send all bytes to Master
-  }
+  readBUSVoltage();
+  Wire.write(voltagesplit, 2);
+  
 }
 
 

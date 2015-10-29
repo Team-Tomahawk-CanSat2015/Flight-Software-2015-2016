@@ -19,7 +19,7 @@
 **/
 //Telemertery data
 unsigned int TeamID = 1086; //1. Done
-unsigned long packetID = 0;//2.
+unsigned long packet_count = 0;//2.
 float pressure_Alt;//3.
 float pitot_speed;//4.
 float temp;//5.
@@ -30,15 +30,27 @@ float GPS_alt;//9.
 float GPS_satnum;//10.
 float GPS_speed;//11.
 float CMD_time;//12.
-float CMD_count;//13.
-unsigned int ServoPos; //14
-unsigned int state = 0;
+int CMD_count;//13.
+unsigned int ServoPos; //14.
+unsigned int state = 0;//15.
+unsigned long m_time; //16.
+
+unsigned long tele_data[16];
 
 //Sub variables
 byte voltage1, voltage2;
 unsigned long daytime;
-unsigned long Missionstarttime;
 unsigned long currtime;
+unsigned long initialize_time = 0;
+unsigned long prev_Time =0;
+unsigned long liftoff_time = 0;
+float ground_alt;
+float init_Heading;
+float alt_buffer[5]; //used for descent rate calculation
+unsigned long alt_buffer_time[5]; //stores last 5 altitudes measured with timestamp
+
+//Physical Pin Description Variables
+int nichrome_pin;
 
 
 
@@ -46,7 +58,7 @@ unsigned long currtime;
 void setup(){
   Serial.begin(115200);
   Setup_I2C(); //Setup I2C bus for slave
-  //boot();
+  boot();
 }
 
 /**
@@ -63,47 +75,45 @@ void loop(){
   //Collect_Sensor_Data();
   Collect_Slave_Data();
   
- /* //2. Preform State-specific functions
+  //2. Preform State-specific functions
   switch (state){
     case 0:
-      //initialize();
+      initialize();
       break;
     case 1:
-      //launch_wait();
+      launch_wait();
       break;
     case 2:
-      //ascent();
+      ascent();
       break;
     case 3:
-      //rocketDeployment_Stabilization();
+      rocketDeployment_Stabilization();
       break;
     case 4:
-      //seperation();
+      seperation();
       break;
     case 5:
-      //descent();
+      descent();
       break;
     case 6:
-      //landed();
+      landed();
       break;
     default:
-      //boot();
-  }*/
+      boot();
+  }
 
   //3. Save State to memory
-  //saveState();
+    saveState();
   
   //4. Transmit and Save data to SD.
-      delay (1000);
-      ++packetID;
-      Transmit_data();
-     //Store_Data_inSD();
+    delay (1000);
+    ++packet_count;
+    Transmit_data();
+   //Store_Data_inSD();
    
   //5. Perform Radio data task
-       //bool did_RadioRecieve = getdatafromRadio();  
-       //PerformRadiotask(did_RadioRecieve);
+     bool did_RadioRecieve = getdatafromRadio(); 
+     if  (did_RadioRecieve)
+     PerformRadiotask();
      
-     
-
-
 }

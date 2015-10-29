@@ -12,8 +12,8 @@ void receiveEvent(int numBytes) {
 */
 void requestEvent() {
   readBUSVoltage();
-  Wire.write(voltagesplit, 2);
-  
+  //Wire.write(voltagesplit, 2);
+  Wire.write(I2Cpacket, 28);
 }
 
 

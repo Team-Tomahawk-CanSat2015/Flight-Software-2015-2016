@@ -1,43 +1,46 @@
 //Used to compile string and send string to radio serial
-void Transmit_data (){
+void TransmitandSave_data (){
   String toradio = "";
   toradio += TeamID;
-  toradio += ", ";
+  toradio += ",";
   toradio += packet_count;
-  toradio += ", ";
+  toradio += ",";
   toradio += pressure_Alt;
-  toradio += ", ";
+  toradio += ",";
   toradio += pitot_speed;
-  toradio += ", ";
+  toradio += ",";
   toradio += temp;
-  toradio += ", ";
-  toradio += voltage1;
-  toradio += ".";
-  if (voltage2 > 10)
-  toradio += voltage2;
-  else{
-  toradio += "0";
-  toradio += voltage2; 
-  }
-  toradio += ", ";
+  toradio += ",";
+  toradio += voltage;
+  toradio += ",";
   toradio += GPS_lat;
-  toradio += ", ";
+  toradio += ",";
   toradio += GPS_lon;
-  toradio += ", ";
+  toradio += ",";
   toradio += GPS_alt;
-  toradio += ", ";
+  toradio += ",";
   toradio += GPS_satnum;
-  toradio += ", ";
+  toradio += ",";
   toradio += GPS_speed;
-  toradio += ", ";
+  toradio += ",";
   toradio += CMD_time;
-  toradio += ", ";
+  toradio += ",";
   toradio += CMD_count;
-  toradio += ", ";
+  toradio += ",";
   toradio += ServoPos;
-  toradio += ", ";
+  toradio += ",";
   toradio += state;
-  Serial.println (toradio);
+  //EXTRA data Starts here, Could possibly comment out but Naaa
+      toradio += ",";
+      toradio += x_alpha;
+      toradio += ",";
+      toradio += y_alpha;
+      toradio += ",";
+      toradio += z_alpha;
+      toradio += ",";
+      toradio += z_rollrate;
+ 
+  Serial.println (toradio); //Print to radio
 }
 
 //Returns True if radio recived data from Ground station or serial port
@@ -66,13 +69,30 @@ void PerformRadiotask(){
     
     case'&': //& For instant Nichrome Burn Baby!!!!!!
     Serial.println ("Recived Nichrome Burn Command");
-    digitalWrite (nichrome_pin, HIGH); 
+    digitalWrite (NichromePin, HIGH); 
     break;
     
     default:
     1+1; //Hope that's Tough enough?
     break;
     }
+}
+
+
+void Collect_Sensor_Data(){
+   adafruit_function (&y_alpha, &x_alpha, &z_alpha, &z_rollrate, &pressure_Alt, &temp); //Update Adafruit 10 DOF IMU data
+   geta_time (&a_time, &a_date); //Update all time variable
+   
+}
+
+
+void Createnewlogfile(){
+    //Serial.print (" CreatingNew Log file Named");
+    geta_time(&a_time, &a_date);
+    Serial.print( "Date = ");
+    Serial.print(a_date);
+    Serial.print( "      Time = ");
+    Serial.println(a_time);
 }
 
 

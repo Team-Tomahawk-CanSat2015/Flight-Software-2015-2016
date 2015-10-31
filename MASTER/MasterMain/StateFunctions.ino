@@ -47,6 +47,19 @@ void descent() {
 }
 
 void landed() {
-  //FUNCTION TASK
+  //FUNCTION TASK :  
+  //1. Acivate Buzzer at certain Intervals!!! 
+      tone (buzzerpin, 262);
+      delay (4000);
+      noTone (buzzerpin);
+      delay (5000);
+      
   //TRANSITION CHECK
+  //0. No Transition here, until reset button is pressed.
+      //End State :)
 }
+
+
+
+
+

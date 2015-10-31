@@ -27,26 +27,20 @@ void boot()
   location+=EEPROM_readAnything(location,state);
   location+=EEPROM_readAnything(location,packet_count);
   location+=EEPROM_readAnything(location,initialize_time);
-  location+=EEPROM_readAnything(location,prev_Time);
+  location+=EEPROM_readAnything(location,prevtrans_Time);
   location+=EEPROM_readAnything(location,liftoff_time);
   location+=EEPROM_readAnything(location,ground_alt);
-  location+=EEPROM_readAnything(location,init_Heading);
   location+=EEPROM_readAnything(location,alt_buffer);
   location+=EEPROM_readAnything(location,alt_buffer_time);
   
-  Serial.println ("***boot***");
-  Serial.print(state);
-  Serial.print(",");
-  Serial.print(packet_count);
-  Serial.print(",");
-  Serial.print(initialize_time);
-  Serial.print(",");
-  Serial.print(prev_Time);
-  Serial.print(",");
-  Serial.print(liftoff_time);
-  Serial.print(",");
-  Serial.print(ground_alt);
-  Serial.print("\n");
+  Serial.print("\n"); Serial.println ("---***Booting from***---");
+  Serial.print("State="); Serial.println(state);
+  Serial.print("PacketCount="); Serial.println(packet_count);
+  Serial.print("InitializeTime=");Serial.println(initialize_time);
+  Serial.print("PreviousTransmitTime=");Serial.println(prevtrans_Time);
+  Serial.print("liftoffTime=");Serial.println(liftoff_time);
+  Serial.print("LiftoffAltitude=");Serial.println(ground_alt);
+  Serial.println ("---***Boot Sucess***---"); Serial.print("\n");
 }
 
 /**
@@ -55,15 +49,14 @@ void boot()
 * - Flight State
 * - packetCount
 */
-void saveState()
+void saveStatetoEEPROM()
 { byte location = 0;
   location+=EEPROM_writeAnything(location,state);
   location+=EEPROM_writeAnything(location,packet_count);
   location+=EEPROM_writeAnything(location,initialize_time);
-  location+=EEPROM_writeAnything(location,prev_Time);
+  location+=EEPROM_writeAnything(location,prevtrans_Time);
   location+=EEPROM_writeAnything(location,liftoff_time);
   location+=EEPROM_writeAnything(location,ground_alt);
-  location+=EEPROM_writeAnything(location,init_Heading);
   location+=EEPROM_writeAnything(location,alt_buffer);
   location+=EEPROM_writeAnything(location,alt_buffer_time);
 }

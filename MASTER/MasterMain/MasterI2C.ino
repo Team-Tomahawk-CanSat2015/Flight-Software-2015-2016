@@ -5,7 +5,7 @@ void Setup_I2C (){
 }
 
 void Collect_Slave_Data(){
-  Wire.requestFrom(19, 2, true);//request 8 bytes from slave device #11
+  Wire.requestFrom(19, 2, true);//request 8 bytes from slave device #19
   Serial.println ("Asking Slave for data"); 
   int timeoutcount = 0;
   //while (Wire.available() == 0 && timeoutcount < 1000){++timeoutcount;} //wait till we get first data

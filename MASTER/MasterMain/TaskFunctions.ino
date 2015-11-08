@@ -64,7 +64,7 @@ void PerformRadiotask(){
     Serial.println ("Recived Camera Command");
     ++CMD_count;
     CMD_time = millis();//need to change this to mission time
-    //TakeSnapShot(); 
+    TakeSnapShot(); 
     break;
     
     case'&': //& For instant Nichrome Burn Baby!!!!!!
@@ -96,6 +96,17 @@ void Createnewlogfile(){
 }
 
 
+void TakeSnapShot(){
+    //Ask slave to take picture
+    Wire.beginTransmission(19);
+    Wire.write(66);
+    Wire.endTransmission(); 
+    
+    SD.begin(10);
+    
+       
+    
+}
 
 
 

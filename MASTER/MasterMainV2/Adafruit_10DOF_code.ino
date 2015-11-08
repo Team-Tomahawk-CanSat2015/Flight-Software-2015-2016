@@ -20,7 +20,9 @@
   void  initilize_Adafruit_10_DOF_Sensors()
   {
     if(!bmp.begin())
-    { Serial.println("ERROR Pressure Sensor");}
+    { 
+    Serial.println("ERROR Pressure Sensor");
+    }
   }
   void adafruit_function () //Input Variables are global now!!
   {   

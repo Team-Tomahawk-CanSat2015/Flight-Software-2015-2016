@@ -47,9 +47,7 @@ float Tele_data[19];
 unsigned long a_time, a_date; //Actual time and date
 unsigned long initialize_time = 0;
 unsigned long prevtrans_Time =0, liftoff_time = 0;
-float ground_alt;
-float alt_buffer[5]; //used for descent rate calculation
-unsigned long alt_buffer_time[5]; //stores last 5 altitudes measured with timestamp
+
 
 /**
 * Flight Software state variable:
@@ -64,10 +62,11 @@ unsigned long alt_buffer_time[5]; //stores last 5 altitudes measured with timest
 
 void setup(){
   Setup_RSTpin(); //Setup pin used for soft reset
-  Serial.begin(115200); Serial.println ("--Master Start...--");
+  Serial.begin(115200); 
+  //Serial.println ("--Master Start...--");
   Wire.begin(); //Setup I2C bus for slave
   //Createnewlogfile();
-  //boot();
+  boot();
 
   
 }
@@ -84,13 +83,14 @@ void loop(){
   
   if (digitalRead(memoryresetpin) == HIGH){ //If reset button is pressed
     //TakeSnapShot();
-    Serial.println ("---Reseting Memory..."); delay (200);
-    Serial.println ("---Reseting Memory Sucess!");
-    //boot(); //Reboot
+    //Serial.println ("---Reseting Memory..."); 
+    //Serial.println ("---Reseting Memory Sucess!");
+    delay (200);
+    boot(); //Reboot
   }
   
   //1. Collect data from sensors and slave Processor and fill Sensor_Data array
- // Collect_Sensor_Data();
+ // Update_Sensor_Data();
  // Collect_Slave_Data();
   
   //2. Preform State-specific functions
@@ -128,7 +128,7 @@ void loop(){
     if (millis() - prevtrans_Time >= (1)*1000){ // 1 second telemetery transfer rate
     prevtrans_Time = millis();;
     ++packet_count;
-    TransmitandSave_data();
+    TransmitandSave_data(1);
     }
    
   //5. Perform Radio data task

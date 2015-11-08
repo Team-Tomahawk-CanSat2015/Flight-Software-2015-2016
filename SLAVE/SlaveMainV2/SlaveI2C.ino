@@ -23,13 +23,12 @@ void receiveEvent (int howMany){
   switch (Master_msg){
   case 10:
   Serial.println ("--Taking Snapshot!--");
-  SavetoSD("So picture string here", "pic.txt");
+  char fiel = char(rand());
+  SavetoSD("So picture string here 2", strcat(&fiel, ".txt"));
   for (int i = 10;i<=13;++i){digitalWrite(i,LOW);}
+  Wire.write(&fiel, 1);
   break;
   
-  default:
-  Serial.println("Invalid Data from Master");
-  break;
   }
 
 

@@ -1,5 +1,5 @@
 //Used to compile string and send string to radio serial
-void TransmitandSave_data (){
+void TransmitandSave_data (byte save){
   String radio = "";
   radio += TeamID; radio += ",";
   for (int i=0; i<19; ++i){
@@ -7,7 +7,12 @@ void TransmitandSave_data (){
   radio += "," ;
   }
   Serial.println (radio);
-  SavetoSD(radio, "Mdata.txt");
+  if (save == 1){
+  //Extra stuff to save
+  radio += a_time; radio += ",";
+  radio += a_date; radio += ",";
+  SavetoSD(radio, "M_tele.txt");
+   }
 }
 
 //Returns True if radio recived data from Ground station or serial port
@@ -24,7 +29,7 @@ void PerformRadiotask(){
   
     switch (recv.charAt(0)){
     case '#': //#160 to change servo angle
-    Serial.println ("Recived Servo Command");
+    //Serial.println ("Recived Servo Command");
     break;
     
     case'*': //* to take snapshot of camera
@@ -35,7 +40,7 @@ void PerformRadiotask(){
     break;
     
     case'&': //& For instant Nichrome Burn Baby!!!!!!
-    Serial.println ("Recived Nichrome Burn Command");
+    //Serial.println ("Recived Nichrome Burn Command");
     digitalWrite (NichromePin, HIGH); 
     break;
     
@@ -52,9 +57,8 @@ void Update_Sensor_Data(){
    
 }
 
-
+   //Ask slave to take snapshot and store in SD fro Master retrival
 void TakeSnapShot(){
-    //Ask slave to take picture
     Wire.beginTransmission(19);
     byte toSlave_msg = 10;
     Wire.write(toSlave_msg);

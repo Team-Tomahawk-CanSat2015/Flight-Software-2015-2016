@@ -123,7 +123,7 @@ void takePic() {
   while (keepgoing) {
     Serial.println("Please enter a filename: ");
     while (Serial.available() == 0) {} // waiting for user input
-    pictureName = Serial.readString(); // Read user input into pictureName
+    pictureName = Serial.readString() + ".JPG"; // Read user input into pictureName
 
     if (! cam.takePicture())
       Serial.println("Failed to snap!");

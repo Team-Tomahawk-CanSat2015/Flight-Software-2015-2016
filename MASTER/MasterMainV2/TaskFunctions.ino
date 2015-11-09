@@ -11,7 +11,7 @@ void TransmitandSave_data (byte save){
   //Extra stuff to save
   radio += a_time; radio += ",";
   radio += a_date; radio += ",";
-  SavetoSD(radio, "M_tele.txt");
+  SavetoSD(radio, "M.txt");
    }
 }
 

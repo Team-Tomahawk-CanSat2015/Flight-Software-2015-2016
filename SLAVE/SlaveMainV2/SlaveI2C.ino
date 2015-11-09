@@ -7,9 +7,7 @@
 * Data = [voltage, LAT, Long, Alt, SatNum, GPSSpeed, Servopos]
 */
 void requestEvent() {
-  readBUSVoltage();
-  //Wire.write(voltagesplit, 2);
-  Wire.write(I2Cpacket, 28);
+  Wire.write(&curr_picfile, 1);
 }
 
 
@@ -23,10 +21,13 @@ void receiveEvent (int howMany){
   switch (Master_msg){
   case 10:
   Serial.println ("--Taking Snapshot!--");
-  char fiel = char(rand());
-  SavetoSD("So picture string here 2", strcat(&fiel, ".txt"));
+  byte num_by = (byte)random (62, 122);
+  char buff;
+  String num = String(random (1, 9));
+  num += ".JPG";
+  const char* filestr = num.c_str();
+  SavetoSD("So picture string here 2", (char*)filestr);
   for (int i = 10;i<=13;++i){digitalWrite(i,LOW);}
-  Wire.write(&fiel, 1);
   break;
   
   }

@@ -3,8 +3,9 @@ void Collect_Slave_Data(){
   //Serial.println ("Asking Slave for data"); 
   if (Wire.available()>0){
   char d = Wire.read();
-  if (d != '0'){
-  readSend_SDcontents(&d);
+  Serial.println (d);
+  if (d != '0'){ //not equal to 0 is for picture
+  //readSend_SDcontents(&d);
   }
   
   }
@@ -12,7 +13,7 @@ void Collect_Slave_Data(){
 }
 void readSend_SDcontents(char* filetoSend){
   int count=0; 
-  myFile = SD.open(filetoSend+".txt");
+  myFile = SD.open(strcat (filetoSend, ".txt"));
   if (myFile) {
     while (myFile.available()) {
       Serial.write(myFile.read());

@@ -9,6 +9,7 @@
 #include <SPI.h>
 #include <SD.h>
 File myFile;
+char curr_picfile;
 
 #define Active_LED 9
 
@@ -27,6 +28,8 @@ byte I2Cpacket[7*4] = {0, 0, 0, 0, //Voltage
                        5, 5, 5, 5,
                        6, 6, 6, 6};//Data string to send to Master
 //VOLTAGE,GPSLATITUDE,GPSLONGITUDE,GPSALTITUDE,GPSSATNUM,GPSSPEED,ServoPOS
+
+String c_picfile;
 
 void setup(){
   Serial.begin(115200);

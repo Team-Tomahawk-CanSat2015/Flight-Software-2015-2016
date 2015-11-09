@@ -26,7 +26,7 @@ void boot()
   location+=EEPROM_readAnything(location,state);
   location+=EEPROM_readAnything(location,packet_count);
   
-  Serial.println ("--***Boot***--");
+ //Serial.println ("--***Boot***--");
  //Serial.print("\n");Serial.println ("---***Booting from***---");
  //Serial.print("State="); Serial.println(state);
  //Serial.print("PacketCount="); Serial.println(packet_count);

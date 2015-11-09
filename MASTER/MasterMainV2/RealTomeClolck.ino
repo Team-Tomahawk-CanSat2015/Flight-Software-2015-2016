@@ -25,5 +25,6 @@ void geta_time(unsigned long *a_time, unsigned long *a_date)
   months      = bcdToDec(Wire.read());
   years       = bcdToDec(Wire.read());
  *a_date = (30*months)+dayinmonth+years;
+ //Serial.println (*a_time);
 }
  

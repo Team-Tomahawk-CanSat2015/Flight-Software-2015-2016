@@ -2,6 +2,7 @@
 void TransmitandSave_data (byte save){
   String radio = "";
   radio += TeamID; radio += ",";
+  radio += packet_count; radio += ",";
   for (int i=0; i<19; ++i){
   radio += Tele_data[i];
   radio += "," ;
@@ -23,7 +24,7 @@ bool getdatafromRadio () {
     return true;
 }
 
-//Either adjusts servo angle on slave or takes a SHOT on Master
+//Either adjusts servo angle on slave or takes a SHOTs
 void PerformRadiotask(){
   String recv = Serial.readString();
   

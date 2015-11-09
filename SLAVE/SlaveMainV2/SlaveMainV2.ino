@@ -8,10 +8,15 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
+#include <Adafruit_VC0706.h>
+#include <SoftwareSerial.h> 
+
+
 File myFile;
 char curr_picfile;
 
 #define Active_LED 9
+#define chipSelect 10
 
 //Global Variables
 byte Master_msg; //Message from Master

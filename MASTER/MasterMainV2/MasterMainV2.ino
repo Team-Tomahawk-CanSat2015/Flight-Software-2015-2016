@@ -86,11 +86,12 @@ void loop(){
     //Serial.println ("---Reseting Memory..."); 
     //Serial.println ("---Reseting Memory Sucess!");
     delay (200);
+    ClearEEPROMMemory();
     boot(); //Reboot
   }
   
   //1. Collect data from sensors and slave Processor and fill Sensor_Data array
- // Update_Sensor_Data();
+   // Update_Sensor_Data();
  // Collect_Slave_Data();
   
   //2. Preform State-specific functions
@@ -122,11 +123,11 @@ void loop(){
   }
 
   //3. Save State to memory
-    //saveStatetoEEPROM();
+    saveStatetoEEPROM();
   
   //4. Transmit and Save data to SD.
-    if (millis() - prevtrans_Time >= (1)*1000){ // 1 second telemetery transfer rate
-    prevtrans_Time = millis();;
+    if (millis() - prevtrans_Time >= (1) *1000){ // 1 second telemetery transfer rate
+    prevtrans_Time = millis ();
     ++packet_count;
     TransmitandSave_data(1);
     }

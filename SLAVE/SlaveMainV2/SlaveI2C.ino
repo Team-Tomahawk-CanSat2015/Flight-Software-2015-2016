@@ -16,6 +16,7 @@ void requestEvent() {
 void receiveEvent (int howMany){
   if (Wire.available() > 0) { 
     Master_msg = Wire.read(); 
+    Serial.print("Command recived from MAster -> ");
     Serial.println(Master_msg);        
   }
   switch (Master_msg){
@@ -26,8 +27,8 @@ void receiveEvent (int howMany){
   String num = String(random (1, 9));
   num += ".JPG";
   const char* filestr = num.c_str();
-  SavetoSD("So picture string here 2", (char*)filestr);
-  for (int i = 10;i<=13;++i){digitalWrite(i,LOW);}
+  //SavetoSD("So picture string here 2", (char*)filestr);
+  takepic = true;
   break;
   
   }

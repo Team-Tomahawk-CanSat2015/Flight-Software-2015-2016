@@ -43,4 +43,5 @@ void saveStatetoEEPROM()
 { byte location = 0;
   location+=EEPROM_writeAnything(location,state);
   location+=EEPROM_writeAnything(location,packet_count);
+  
 }

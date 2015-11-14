@@ -8,22 +8,29 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
+#include <Adafruit_Sensor.h>            
+#include <Adafruit_BMP085_U.h> 
 File myFile;
 
-//Physical pin setups in software
+//Physical pin and adress setups in software
 #define RstPin 9
 #define TeamID 1086
 #define buzzerpin 6 
 #define memoryresetpin 8
 #define NichromePin 5
 #define DS1307_I2C_ADDRESS 0x68  // the I2C address of RTC
+#define slaveusingSDPin 7
+#define Slave_I2C_Adress 19
 
 unsigned long packet_count = 0;
 int state = 0;
 unsigned long m_time;
+int Slave_Array_Size = 3;
+byte Slave_data[3]; //See MAster_Slave_I2C for meaning
 
 
 //---------------Telemertery data
+int Tele_Array_Size = 19;
 float Tele_data[19]; 
 //float pressure_Alt;//0.
 //float pressure;//1.
@@ -63,12 +70,9 @@ unsigned long prevtrans_Time =0, liftoff_time = 0;
 void setup(){
   Setup_RSTpin(); //Setup pin used for soft reset
   Serial.begin(115200); 
-  //Serial.println ("--Master Start...--");
+  pinMode(slaveusingSDPin, INPUT); //Setup pin indicator if slave is using SD card BUS
   Wire.begin(); //Setup I2C bus for slave
-  //Createnewlogfile();
   boot();
-
-  
 }
 
 /**
@@ -82,9 +86,6 @@ void setup(){
 void loop(){
   
   if (digitalRead(memoryresetpin) == HIGH){ //If reset button is pressed
-    //TakeSnapShot();
-    //Serial.println ("---Reseting Memory..."); 
-    //Serial.println ("---Reseting Memory Sucess!");
     delay (200);
     ClearEEPROMMemory();
     boot(); //Reboot
@@ -92,7 +93,7 @@ void loop(){
   
   //1. Collect data from sensors and slave Processor and fill Sensor_Data array
    // Update_Sensor_Data();
- // Collect_Slave_Data();
+   // Update_Slave_info();
   
   //2. Preform State-specific functions
   switch (state){
@@ -118,8 +119,7 @@ void loop(){
       landed();
       break;
     default:
-    1+1;
-      //boot();
+      boot();
   }
 
   //3. Save State to memory
@@ -134,7 +134,6 @@ void loop(){
    
   //5. Perform Radio data task
      bool did_RadioRecieve = getdatafromRadio(); 
-     if  (did_RadioRecieve)
-     PerformRadiotask();
+     if  (did_RadioRecieve)  PerformRadiotask();
      
 }

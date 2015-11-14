@@ -1,3 +1,6 @@
+/*Flight tasks that are important but cannot be really clasified are held in this file*/
+
+
 //Used to compile string and send string to radio serial
 void TransmitandSave_data (byte save){
   String radio = "";
@@ -8,7 +11,7 @@ void TransmitandSave_data (byte save){
   radio += "," ;
   }
   Serial.println (radio);
-  if (save == 1){
+  if (save == 1 && digitalRead(slaveusingSDPin) == LOW){
   //Extra stuff to save
   radio += a_time; radio += ",";
   radio += a_date; radio += ",";
@@ -37,7 +40,7 @@ void PerformRadiotask(){
     Serial.println ("Recived Camera Command from GCS");
     ++Tele_data[11];//++CMD_count;
     Tele_data[10] = millis (); //CMD_time = millis();//need to change this to mission time
-    TakeSnapShot(); 
+    AsktoTakeSnapShot(); 
     break;
     
     case'&': //& For instant Nichrome Burn Baby!!!!!!
@@ -58,8 +61,8 @@ void Update_Sensor_Data(){
    
 }
 
-   //Ask slave to take snapshot and store in SD fro Master retrival
-void TakeSnapShot(){
+ //Ask slave to take snapshot and store in SD fro Master retrival
+void AsktoTakeSnapShot(){
     Wire.beginTransmission(19);
     byte toSlave_msg = 10;
     Wire.write(toSlave_msg);
@@ -73,7 +76,7 @@ pinMode(RstPin, INPUT);
 }
 
 void soft_RST(){
-delay (200);
+Serial.flush();
 pinMode(RstPin, OUTPUT);
 digitalWrite (RstPin, LOW);
 }

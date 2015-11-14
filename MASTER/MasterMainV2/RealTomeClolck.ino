@@ -1,13 +1,11 @@
-////////////**************RTC functions below*********************/////////////////////
+////**************RTC functions below********************/////////
+//Tic toc, tic toc,. No need for Luck.
 
-// Used to Convert normal decimal numbers to binary coded decimal
 byte decToBcd(byte val) {return ( (val/10*16) + (val%10) );}
-// Used to Convert binary coded decimal to normal decimal numbers
 byte bcdToDec(byte val) {return ( (val/16*10) + (val%16) );}
 
-
-void geta_time(unsigned long *a_time, unsigned long *a_date)
-{
+//Used to update actual_Time and Actual_Date
+void geta_time(unsigned long *a_time, unsigned long *a_date){
   byte second, minute, hour;
   byte dayinWeek, dayinmonth, months, years;
   // Reset the register pointer
@@ -20,11 +18,11 @@ void geta_time(unsigned long *a_time, unsigned long *a_date)
   hour   = bcdToDec(Wire.read() & 0x3f);  // Need to change this if 12 hour am/pm
   *a_time = ((hour * 60 * 60) + (minute * 60) + (second));
  
-  dayinWeek  = bcdToDec(Wire.read());
+  /*dayinWeek  = bcdToDec(Wire.read());
   dayinmonth = bcdToDec(Wire.read());
   months      = bcdToDec(Wire.read());
   years       = bcdToDec(Wire.read());
- *a_date = (30*months)+dayinmonth+years;
- //Serial.println (*a_time);
+ *a_date = (30*months)+dayinmonth+years;*/
+ *a_date = 0;
 }
  

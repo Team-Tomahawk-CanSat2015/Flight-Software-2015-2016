@@ -4,27 +4,27 @@
 #include <SoftwareSerial.h> 
 
 SoftwareSerial cameraconnection = SoftwareSerial(2, 3);
-Adafruit_VC0706 cam = Adafruit_VC0706(&Serial);
+Adafruit_VC0706 cam = Adafruit_VC0706(&cameraconnection);
 
 void setup (){
-  //Serial.begin (9600);
-  setupCAM();
+  Serial.begin (115200);
   takepic ("1.JPG");
 }
 
 void loop (){
    //do Nothing
-   Serial.println ("....");
+   //Serial.println ("....");
 }
 
 
 /****************************************************************************/
-void setupCAM() {  
-  if (!cam.begin(115200)) {Serial.println("Error Camera");}
-  cam.setImageSize(VC0706_640x480);
-}
-
 void takepic (char* pictureName){
+  if (!cam.begin()) {Serial.println("Error Camera");}
+  Serial.println ("Camera Activated");
+  char *reply = cam.getVersion();
+  cam.setImageSize(VC0706_640x480);
+  delay(100);
+  
     if (!cam.takePicture())
       Serial.println("Failed to snap!");
       
@@ -45,7 +45,7 @@ void takepic (char* pictureName){
 
     // black magic
     int32_t time = millis();
-    pinMode(8, OUTPUT);
+    int count = 0;
     while (jpglen > 0) {
       // read 64 bytes at a time;
       uint8_t *buffer;
@@ -53,9 +53,11 @@ void takepic (char* pictureName){
       buffer = cam.readPicture(bytesToRead);
       imgFile.write(buffer, bytesToRead);
       jpglen -= bytesToRead;
+      ++count;
+      if (count >= 64){Serial.print("..."); count =0;}
     }
     
     imgFile.close();
     time = millis() - time;
-    Serial.println(time); 
+    Serial.print("Total Time for Pic transfer = ");Serial.println(time); 
   }

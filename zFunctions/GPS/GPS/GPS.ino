@@ -1,11 +1,10 @@
-#include <string.h>
 
 //Functions and data types***************
 struct gpsDataUnit {
-  float satTime[3];
-  float latitude[2];
+  float satTime[3];//    0: Hours  1: Minutes 2: Seconds
+  float latitude[3];//   0: Degree 1: Minutes 2: Direction
   char latDir;
-  float longitude[2];
+  float longitude[3];//  0: Degree 1: Minutes 2: Direction
   char longDir;
   float altitude;
   char altUnit;
@@ -15,16 +14,12 @@ struct gpsDataUnit {
 
 void callGPS(gpsDataUnit* Unit);
 void printStuff(gpsDataUnit* Unit);
-void parseGSA(gpsDataUnit* Unit);
-void parseGSV(gpsDataUnit* Unit);
-void parseRMC(gpsDataUnit* Unit);
-void parseVTG(gpsDataUnit* Unit);
 //***************************************
 
 
 //Global Variabes************************
 //gpsDataUnit gpsData;
-const short HOUR = 0, MIN = 1, SEC = 2, DEGREE = 0; 
+const short HOUR = 0, MIN = 1, SEC = 2, DEGREE = 0, DIRECTION = 2; 
 //***************************************
 
 
@@ -47,21 +42,23 @@ void callGPS(struct gpsDataUnit* unit) {
   Serial.flush();
   int index1 = data.indexOf("$GPGGA");
   int index2 = data.indexOf("$", index1 +1);
-
+  float temp;
+  
   //ParseGGA
   String GGA = data.substring(index1, index2);
   GGA.remove(0, 7);
 
   
   //ParseTime
-  float temp = GGA.toFloat();
+  /*
+  temp = GGA.toFloat();
   unit->satTime[HOUR] = (int) temp / 10000;
   temp -= unit->satTime[HOUR] *10000;
   unit->satTime[MIN] = (int)temp / 100;
   temp -= unit-> satTime[MIN] * 100;
   unit->satTime[SEC] = temp;
+  */
 
-  
 
   //Lat+Long
   GGA.remove(0,GGA.indexOf(",")+1);
@@ -70,17 +67,33 @@ void callGPS(struct gpsDataUnit* unit) {
   unit->latitude[MIN]= temp - unit->latitude[DEGREE] * 100;
   GGA.remove(0, GGA.indexOf(",")+1);
   unit->latDir = GGA.charAt(0);
+  if (unit->latDir == 'N'){
+  unit->latitude[DIRECTION] = 1;
+  } else if (unit->latDir == 'E'){
+   unit->latitude[DIRECTION] = 2;
+  } else if (unit->latDir == 'S'){
+   unit->latitude[DIRECTION] = 3;
+  } else if (unit->latDir == 'W'){
+   unit->latitude[DIRECTION] = 4;
+  }
   
-
   GGA.remove(0, GGA.indexOf(",")+1);
   temp = GGA.toFloat();
   unit->longitude[DEGREE] = (int) temp /100;
   unit->longitude[MIN] = temp - unit->longitude[DEGREE]*100;
   GGA.remove(0, GGA.indexOf(",")+1);
   unit->longDir = GGA.charAt(0);
-
+   if (unit->longDir == 'N'){
+   unit->longitude[DIRECTION] = 1;
+  } else if (unit->longDir == 'E'){
+   unit->longitude[DIRECTION] = 2;
+  } else if (unit->longDir == 'S'){
+   unit->longitude[DIRECTION] = 3;
+  } else if (unit->longDir == 'W'){
+   unit->longitude[DIRECTION] = 4;
+  }
+  
   //Number of Satalites
-
   GGA.remove(0, GGA.indexOf(",")+1);
   GGA.remove(0, GGA.indexOf(",")+1);
   unit->satNum = GGA.toFloat();
@@ -91,9 +104,6 @@ void callGPS(struct gpsDataUnit* unit) {
   unit->altitude = GGA.toFloat();
   GGA.remove(0, GGA.indexOf(",")+1);
   unit->altUnit = GGA.charAt(0);
-
-
-  
 
   //ParseVTG
   index1 = data.indexOf("$GPVTG");
@@ -110,15 +120,6 @@ void callGPS(struct gpsDataUnit* unit) {
   Serial.println(VTG);
   unit->velocity = VTG.toFloat();
 }
-
-
-
-
-
-
-
-
-
 
 //Time/Position/Fix Information Parsing Function
 void printStuff(struct gpsDataUnit* unit) {

@@ -10,4 +10,8 @@ void readBUSVoltage()
   voltage2 = (byte)( (int)((voltage -(int)voltage) *100));
   voltagesplit[1] = (byte)( (int)((voltage -(int)voltage) *100));
   Serial.print("voltage2 = ");Serial.println(voltage2);
+  floattobytes (voltage ,0);
+  
+  
+  
 }

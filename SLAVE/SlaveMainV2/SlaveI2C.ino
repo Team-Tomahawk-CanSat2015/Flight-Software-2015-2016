@@ -20,18 +20,20 @@ void receiveEvent (int howMany){
     Serial.println(Master_msg);        
   }
   switch (Master_msg){
-  case 10:
+  case 10: {//Take picture case
   Serial.println ("--Taking Snapshot!--");
   byte num_by = (byte)random (62, 122);
   char buff;
   String num = String(random (1, 9));
   num += ".JPG";
   const char* filestr = num.c_str();
-  //SavetoSD("So picture string here 2", (char*)filestr);
   takepic = true;
   break;
-  
   }
+
+
+  
+ }
 
 
 

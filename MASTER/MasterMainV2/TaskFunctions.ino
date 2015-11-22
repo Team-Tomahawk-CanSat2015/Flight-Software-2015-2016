@@ -32,21 +32,24 @@ void PerformRadiotask(){
   String recv = Serial.readString();
   
     switch (recv.charAt(0)){
-    case '#': //#160 to change servo angle
-    //Serial.println ("Recived Servo Command");
-    break;
+    case '#':{ //#160 to change servo angle
+    Serial.println ("--Recived Servo Command!!--");
+    recv.remove (0, 1);
+    int serv_pos = recv.toInt();
+    CamServ.write (serv_pos);
+    break;}
     
-    case'*': //* to take snapshot of camera
+    case'*':{ //* to take snapshot of camera
     Serial.println ("Recived Camera Command from GCS");
     ++Tele_data[11];//++CMD_count;
     Tele_data[10] = millis (); //CMD_time = millis();//need to change this to mission time
-    AsktoTakeSnapShot(); 
-    break;
+    AsktoTakeSnapShot();
+    break;}
     
-    case'&': //& For instant Nichrome Burn Baby!!!!!!
+    case'&':{ //& For instant Nichrome Burn Baby!!!!!!
     //Serial.println ("Recived Nichrome Burn Command");
     digitalWrite (NichromePin, HIGH); 
-    break;
+    break;}
     
     default:
     1+1; //Hope that's Tough enough?
@@ -80,6 +83,7 @@ Serial.flush();
 pinMode(RstPin, OUTPUT);
 digitalWrite (RstPin, LOW);
 }
+
 
 
 

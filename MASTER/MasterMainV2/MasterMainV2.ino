@@ -10,7 +10,9 @@
 #include <SD.h>
 #include <Adafruit_Sensor.h>            
 #include <Adafruit_BMP085_U.h> 
+#include <Servo.h>
 File myFile;
+Servo CamServ;
 
 //Physical pin and adress setups in software
 #define RstPin 9
@@ -73,6 +75,7 @@ void setup(){
   pinMode(slaveusingSDPin, INPUT); //Setup pin indicator if slave is using SD card BUS
   Wire.begin(); //Setup I2C bus for slave
   boot();
+  CamServ.attach (6);
 }
 
 /**
@@ -123,7 +126,7 @@ void loop(){
   }
 
   //3. Save State to memory
-    saveStatetoEEPROM();
+   // saveStatetoEEPROM();
   
   //4. Transmit and Save data to SD.
     if (millis() - prevtrans_Time >= (1) *1000){ // 1 second telemetery transfer rate

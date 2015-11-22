@@ -3,6 +3,7 @@ Adafruit_VC0706 cam = Adafruit_VC0706(&cameraconnection);
 
 /****************************************************************************/
 void takepicture (char* pictureName){
+  if (!SD.begin(10)){Serial.println("SD Error");}
   if (!cam.begin()) {Serial.println("Error Camera");}
   Serial.println ("Camera Activated");
   char *reply = cam.getVersion();
@@ -19,13 +20,13 @@ void takepicture (char* pictureName){
     filename[5] = '0' + i/10;
     filename[6] = '0' + i%10;
     // create if does not exist, do not open existing, write, sync after write
-    if (! SD.exists(filename)) {
+    if (SD.exists(filename) == false) {
       lastImgNum = i;
-      break;
+      Serial.println (filename);
+      i = 101;
     }
   }
-      
-    if (!SD.begin(10)){Serial.println("SD Error");}
+       
     File imgFile = SD.open(filename, FILE_WRITE);
     if (!imgFile){Serial.println("Camera File Error");}
      
@@ -53,7 +54,7 @@ void takepicture (char* pictureName){
      }
   }
 
-void SendPictureonSerial(){
+/*void SendPictureonSerial(){
   int sec_count=0;
   char filename[13];
   strcpy(filename, "IMAGE00.JPG");
@@ -78,7 +79,7 @@ void SendPictureonSerial(){
     Serial.println("File Serial print Done");
     
     }
-
+*/
 
 
 

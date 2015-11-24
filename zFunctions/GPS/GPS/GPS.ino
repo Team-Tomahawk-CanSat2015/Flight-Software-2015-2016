@@ -2,9 +2,11 @@
 //Functions and data types***************
 struct gpsDataUnit {
   float satTime[3];//    0: Hours  1: Minutes 2: Seconds
-  float latitude[3];//   0: Degree 1: Minutes 2: Direction
+  float latitudeDMD[3];//   0: Degree 1: Minutes 2: Direction
+  float latitude;
   char latDir;
-  float longitude[3];//  0: Degree 1: Minutes 2: Direction
+  float longitudeDMD[3];//  0: Degree 1: Minutes 2: Direction
+  float longitude;
   char longDir;
   float altitude;
   char altUnit;
@@ -63,35 +65,40 @@ void callGPS(struct gpsDataUnit* unit) {
   //Lat+Long
   GGA.remove(0,GGA.indexOf(",")+1);
   temp = GGA.toFloat();
-  unit->latitude[DEGREE] = int(temp)/ 100;
-  unit->latitude[MIN]= temp - unit->latitude[DEGREE] * 100;
+  unit->latitudeDMD[DEGREE] = int(temp)/ 100;
+  unit->latitudeDMD[MIN]= temp - unit->latitudeDMD[DEGREE] * 100;
   GGA.remove(0, GGA.indexOf(",")+1);
   unit->latDir = GGA.charAt(0);
   if (unit->latDir == 'N'){
-  unit->latitude[DIRECTION] = 1;
+  unit->latitudeDMD[DIRECTION] = 1;
   } else if (unit->latDir == 'E'){
-   unit->latitude[DIRECTION] = 2;
+   unit->latitudeDMD[DIRECTION] = 2;
   } else if (unit->latDir == 'S'){
-   unit->latitude[DIRECTION] = 3;
+   unit->latitudeDMD[DIRECTION] = 3;
   } else if (unit->latDir == 'W'){
-   unit->latitude[DIRECTION] = 4;
+   unit->latitudeDMD[DIRECTION] = 4;
   }
   
   GGA.remove(0, GGA.indexOf(",")+1);
   temp = GGA.toFloat();
-  unit->longitude[DEGREE] = (int) temp /100;
-  unit->longitude[MIN] = temp - unit->longitude[DEGREE]*100;
+  unit->longitudeDMD[DEGREE] = (int) temp /100;
+  unit->longitudeDMD[MIN] = temp - unit->longitudeDMD[DEGREE]*100;
   GGA.remove(0, GGA.indexOf(",")+1);
   unit->longDir = GGA.charAt(0);
    if (unit->longDir == 'N'){
-   unit->longitude[DIRECTION] = 1;
+   unit->longitudeDMD[DIRECTION] = 1;
   } else if (unit->longDir == 'E'){
-   unit->longitude[DIRECTION] = 2;
+   unit->longitudeDMD[DIRECTION] = -1;
   } else if (unit->longDir == 'S'){
-   unit->longitude[DIRECTION] = 3;
+   unit->longitudeDMD[DIRECTION] = 1;
   } else if (unit->longDir == 'W'){
-   unit->longitude[DIRECTION] = 4;
+   unit->longitudeDMD[DIRECTION] = -1;
   }
+
+  //Convert Lat/Long
+  unit->longitude = unit->longitudeDMD[DIRECTION] * (unit->longitudeDMD[DEGREE] + (unit->longitudeDMD[MIN])/60.0);
+  unit->latitude = unit->latitudeDMD[DIRECTION] * (unit->latitudeDMD[DEGREE] + (unit->latitudeDMD[MIN])/60.0);
+  
   
   //Number of Satalites
   GGA.remove(0, GGA.indexOf(",")+1);
@@ -131,17 +138,17 @@ void printStuff(struct gpsDataUnit* unit) {
   Serial.print(" : ");
   Serial.println(unit -> satTime[SEC]);
 
-  Serial.print("Longitude: ");
-  Serial.print(unit->longitude[DEGREE]);
+  Serial.print("longitudeDMD: ");
+  Serial.print(unit->longitudeDMD[DEGREE]);
   Serial.print("'");
-  Serial.print(unit->longitude[MIN]);
+  Serial.print(unit->longitudeDMD[MIN]);
   Serial.print(" ");
   Serial.println(unit -> longDir);
 
-  Serial.print("Latitude: ");
-  Serial.print(unit->latitude[DEGREE]);
+  Serial.print("latitudeDMD: ");
+  Serial.print(unit->latitudeDMD[DEGREE]);
   Serial.print("'");
-  Serial.print(unit->latitude[MIN]);
+  Serial.print(unit->latitudeDMD[MIN]);
   Serial.print(" ");
   Serial.println(unit -> latDir);
 

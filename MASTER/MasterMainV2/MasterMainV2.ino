@@ -96,7 +96,7 @@ void loop(){
   
   //1. Collect data from sensors and slave Processor and fill Sensor_Data array
    // Update_Sensor_Data();
-   // Update_Slave_info();
+   // Update_Slave_data();
   
   //2. Preform State-specific functions
   switch (state){

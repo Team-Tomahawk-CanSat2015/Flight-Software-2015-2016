@@ -30,8 +30,6 @@ void receiveEvent (int howMany){
   takepic = true;
   break;
   }
-
-
   
  }
 

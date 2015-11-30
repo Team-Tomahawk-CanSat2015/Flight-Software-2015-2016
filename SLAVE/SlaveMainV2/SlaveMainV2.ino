@@ -39,10 +39,6 @@ struct gpsDataUnit {
   float lat_degrees;
 } gpsData;
 
-
-
-
-
 void setup(){
   Serial.begin(9600);
   Serial.setTimeout(500); //Setup for Gps

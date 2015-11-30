@@ -56,6 +56,7 @@ float Tele_data[19];
 unsigned long a_time, a_date; //Actual time and date
 unsigned long initialize_time = 0;
 unsigned long prevtrans_Time =0, liftoff_time = 0;
+byte previous_slaveusingSDPin = 0;
 
 
 /**
@@ -127,16 +128,24 @@ void loop(){
 
   //3. Save State to memory
    // saveStatetoEEPROM();
+
+  //4. Check to see if image transmission sequence should begin
+   if (digitalRead(slaveusingSDPin) && previous_slaveusingSDPin)
+   RunImageTransmissionSequence (); //lol, such a long function name
   
-  //4. Transmit and Save data to SD.
+  //5. Transmit and Save data to SD.
     if (millis() - prevtrans_Time >= (1) *1000){ // 1 second telemetery transfer rate
     prevtrans_Time = millis ();
     ++packet_count;
     TransmitandSave_data(1);
     }
    
-  //5. Perform Radio data task
+  //6. Perform Radio data task
      bool did_RadioRecieve = getdatafromRadio(); 
      if  (did_RadioRecieve)  PerformRadiotask();
+
+
+    //----- Extra Variable Updates
+     previous_slaveusingSDPin = digitalRead(slaveusingSDPin);
      
 }

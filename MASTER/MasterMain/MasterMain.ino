@@ -6,50 +6,57 @@
 
 //Libaries inclusion
 #include <Wire.h>
-//#include <SPI.h>
-//#include <SD.h>
+#include <SPI.h>
+#include <SD.h>
+#include <Adafruit_Sensor.h>            
+#include <Adafruit_BMP085_U.h> 
+#include <Servo.h>
+File myFile;
+Servo CamServ;
 
-//File for Telemetery and picture
-//File Mfile;
-
-//Physical pin setups in software
+//Physical pin and adress setups in software
+#define RstPin 9
 #define TeamID 1086
 #define buzzerpin 6 
 #define memoryresetpin 8
 #define NichromePin 5
 #define DS1307_I2C_ADDRESS 0x68  // the I2C address of RTC
+#define slaveusingSDPin 7
+#define Slave_I2C_Adress 19
+
+unsigned long packet_count = 0;
+int state = 0;
+unsigned long m_time;
+int Slave_Array_Size = 3;
+byte Slave_data[3]; //See MAster_Slave_I2C for meaning
+
 
 //---------------Telemertery data
-float Tele_data[19];
-//TeamID = 1086; //0. 
-//unsigned long packet_count = 0;//1.
-//float pressure_Alt;//2.
-//float pitot_speed;//3.
-//float temp;//4.
-//float voltage;//5.
-//float GPS_lat;//6.
-//float GPS_lon;//7.
-//float GPS_alt;//8.
-//float GPS_satnum;//9.
-//float GPS_speed;//10.
-//float CMD_time;//11.
-//int CMD_count;//12.
-//unsigned int ServoPos; //13.
-//unsigned int state = 0;//14.
-//unsigned long m_time; //15.
+int Tele_Array_Size = 19;
+float Tele_data[19]; 
+//float pressure_Alt;//0.
+//float pressure;//1.
+//float pitot_speed;//2.
+//float temp;//3.
+//float voltage;//4.
+//float GPS_lat;//5.
+//float GPS_lon;//6.
+//float GPS_alt;//7.
+//float GPS_satnum;//8.
+//float GPS_speed;//9.
+//float CMD_time;//10.
+//float CMD_count;//11.
+//float ServoPos; //12.
+//float x_alpha; //xx.
+//float y_alpha; //xx.
+//float z_alpha; //xx.
+//float z_rollrate; //xx.
 
 //-------------Extra variables
-//float x_alpha; //16.
-//float y_alpha; //17.
-//float z_alpha; //18.
-//float z_rollrate; //19.
-byte voltage1, voltage2;
 unsigned long a_time, a_date; //Actual time and date
 unsigned long initialize_time = 0;
 unsigned long prevtrans_Time =0, liftoff_time = 0;
-float ground_alt;
-float alt_buffer[5]; //used for descent rate calculation
-unsigned long alt_buffer_time[5]; //stores last 5 altitudes measured with timestamp
+
 
 /**
 * Flight Software state variable:
@@ -63,10 +70,12 @@ unsigned long alt_buffer_time[5]; //stores last 5 altitudes measured with timest
 **/
 
 void setup(){
-  Serial.begin(115200); Serial.println ("--Start...--");
-  Setup_I2C(); //Setup I2C bus for slave
-  //Createnewlogfile();
-  //boot();
+  Setup_RSTpin(); //Setup pin used for soft reset
+  Serial.begin(115200); 
+  pinMode(slaveusingSDPin, INPUT); //Setup pin indicator if slave is using SD card BUS
+  Wire.begin(); //Setup I2C bus for slave
+  boot();
+  CamServ.attach (6);
 }
 
 /**
@@ -80,15 +89,14 @@ void setup(){
 void loop(){
   
   if (digitalRead(memoryresetpin) == HIGH){ //If reset button is pressed
-    Serial.println ("---Reseting Memory..."); delay (500);
-    ClearEEPROMMemory(); //Clear and reset memory 
-    Serial.println ("---Reseting Memory Sucess!");
+    delay (200);
+    ClearEEPROMMemory();
     boot(); //Reboot
   }
   
   //1. Collect data from sensors and slave Processor and fill Sensor_Data array
- // Collect_Sensor_Data();
- // Collect_Slave_Data();
+   // Update_Sensor_Data();
+   // Update_Slave_data();
   
   //2. Preform State-specific functions
   switch (state){
@@ -118,18 +126,17 @@ void loop(){
   }
 
   //3. Save State to memory
-    //saveStatetoEEPROM();
+   // saveStatetoEEPROM();
   
   //4. Transmit and Save data to SD.
-    if (prevtrans_Time - a_time >= (1)*1000){ // 1 second telemetery transfer rate
-    prevtrans_Time = a_time;
+    if (millis() - prevtrans_Time >= (1) *1000){ // 1 second telemetery transfer rate
+    prevtrans_Time = millis ();
     ++packet_count;
-    TransmitandSave_data();
+    TransmitandSave_data(1);
     }
    
   //5. Perform Radio data task
      bool did_RadioRecieve = getdatafromRadio(); 
-     if  (did_RadioRecieve)
-     PerformRadiotask();
+     if  (did_RadioRecieve)  PerformRadiotask();
      
 }

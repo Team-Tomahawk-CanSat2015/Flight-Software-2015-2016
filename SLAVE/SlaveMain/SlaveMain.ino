@@ -6,50 +6,76 @@
 
 //Libary inclisions
 #include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SoftwareSerial.h> 
+#include <Adafruit_VC0706.h>
 
+File myFile;
+char curr_picfile;
+
+#define Active_LED 8
+#define chipSelect 10
+#define RstPin 9
+#define slaveusingSDPin 7
 
 //Global Variables
-int voltageMeasurementPin=0; //Analog pin A0 for BUS voltage on Slave
-float voltage;
-byte voltage1;
-byte voltage2; 
-byte voltagesplit[2];
-byte I2Cpacket[7*4] = {0, 0, 0, 0, //Voltage
-                       1, 1, 1, 1,
-                       2, 2, 2, 2,
-                       3, 3, 3, 3,
-                       4, 4, 4, 4,
-                       5, 5, 5, 5,
-                       6, 6, 6, 6};//Data string to send to Master
-//VOLTAGE,GPSLATITUDE,GPSLONGITUDE,GPSALTITUDE,GPSSATNUM,GPSSPEED,ServoPOS
+byte Master_msg; //Message from Master
+int lastImgNum;
+
+
+struct gpsDataUnit {
+  float satTime[3];//0: Hours  1: Minutes 2: Seconds
+  float latitude[3];//0: Degree 1: Minutes 2: Direction
+  char latDir;
+  float longitude[3];//0: Degree 1: Minutes 2: Direction
+  char longDir;
+  float altitude;
+  char altUnit;
+  float satNum;
+  float velocity;
+  //----------------
+  float lon_degrees;
+  float lat_degrees;
+} gpsData;
+
+
+
+
 
 void setup(){
-  Serial.begin(115200);
+  Serial.begin(9600);
+  Serial.setTimeout(500); //Setup for Gps
+  Serial.println ("--Slave Start...--");
+  pinMode (slaveusingSDPin, OUTPUT);
+  digitalWrite(slaveusingSDPin, LOW);
+  Setup_RSTpin();
   Wire.begin(19);  // join I2C bus with address #19
   Wire.onReceive(receiveEvent);//"recieveevent" is called when slave recives data from master 
   Wire.onRequest(requestEvent);//"requestenevt" is called master requests data from this slave device.
+  
 }
+
+unsigned long pU_time = 0;
+bool takepic = false, slavedataUpdate = false;
+
 void loop(){
-  //Loop function for Slave is not really needed.
-  //Slave is only Active when Master Requests data from it.
-  //Slave is simply a I2C module.
+  if (takepic == true){
+     digitalWrite(slaveusingSDPin, HIGH);
+     takepicture ("1.JPG");
+     delay (1000);
+     
+     unsigned long t = millis ();
+     //SendPictureonSerial();
+     Serial.println(millis()-t);
+     
+     for (int i = 10;i<=13;++i){digitalWrite(i,LOW);}
+     soft_RST();
+     takepic = false;
+     digitalWrite(slaveusingSDPin, LOW);
+    }
+     
 }
-
-
-//Converts a 4 byte float to a byte array
-void floattobytes (float f, int I2Carray ){
-  long faddr = * (long *) &f;
-  I2Cpacket[I2Carray+0] = (faddr >> 0) & (0xFF);
-  I2Cpacket[I2Carray+1] = (faddr >> 8) & (0xFF);
-  I2Cpacket[I2Carray+2] = (faddr >> 16) & (0xFF);
-  I2Cpacket[I2Carray+3] = (faddr >> 32) & (0xFF);
-}
-
-float bytetofloat (byte bytes[4]){
-float conv = *(float *)&bytes;
-return conv;
-}
-
 
 
 

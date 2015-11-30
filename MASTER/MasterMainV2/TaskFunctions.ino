@@ -1,6 +1,4 @@
 /*Flight tasks that are important but cannot be really clasified are held in this file*/
-
-
 //Used to compile string and send string to radio serial
 void TransmitandSave_data (byte save){
   String radio = "";
@@ -84,6 +82,35 @@ pinMode(RstPin, OUTPUT);
 digitalWrite (RstPin, LOW);
 }
 
+void RunImageTransmissionSequence(){
+  char filename[13];
+  strcpy(filename, "IMAGE00.JPG");
+  for (int i = 0; i < 100; i++) {
+    filename[5] = '0' + i/10;
+    filename[6] = '0' + i%10;
+    // Check to find most recent image file in SD card
+    if (SD.exists(filename) == false) {
+    i = i-1;  
+    filename[5] = '0' + i/10;
+    filename[6] = '0' + i%10;
+    i = 101;
+    }
+  }
+
+  File imgFile = SD.open(filename, FILE_WRITE);
+  if (!imgFile){return;} //If file cant open then return outta function
+  
+  else { //Image transmission sequence below 
+    for(unsigned long jpglen=imgFile.size();jpglen>0;jpglen=jpglen-12000){//Break picture to 12Kb
+    uint8_t *buffer;
+    int bytesToRead = min(12000, jpglen);//12 Kilobytes at a time
+    TransmitandSave_data(0);
+    while (--bytesToRead >= 0){Serial.write(imgFile.read());}
+    delay (1000);
+    }
+   }   
+    imgFile.close();
+}
 
 
 

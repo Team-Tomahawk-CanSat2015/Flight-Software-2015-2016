@@ -1,0 +1,36 @@
+Hello @ANDREW, (@AMRO also read this as it will soon apply to you) 
+PLEASE READ THE FOLLOWING SECTIONS FOR YOUR UPCOMING TASK!
+Try to read it before wednesday, so we can discuss.
+
+//----------------------
+A. Mission Description:
+	Towards Mid-Early Janyary/Febuary 2016 the structures team will be performing a Drop Test on the satlite.
+	The Major GOAL's of this drop test will be:
+		1. To simulate the dynamics of satlite during descent.
+		2. To obtain actual data for descent dynamics.
+		3. To test Radio Antenna.
+	The Electronics team will play an important role in GOAL 2 and GOAL 3.
+	The structures team will need telemetery on their attitude and position during descent.
+	You will be the leader of this mission.
+//----------------------
+B. How to accomplish mission:
+	B1. Below are Parts You will(may) need:
+			1. Adafruit 10-DOF IMU-> for measuring attitude(direction, roll velocity, roll rate) in x,y,z axis (and pressure, temperature and altitude)
+			2. Adafruit GPS -> for measuring Position data and vertical speed.
+			3. SD card Module, SD card -> for storing data on board
+			4. Xbee Radio + antenna -> for Transmiting data.
+			5. Arduino pro mini -> Blahf!
+//-----------------------
+C. Your specefic GOALS
+	Your specefic GOAL's include:
+		1. You will have to create and build a board that is capable of holding the parts in section B1.
+		2. You will have to program and configure all systems with little help from myself (@TAYO).
+		3. You will work closely with @DAN on any other impromptu needs.
+		4. I will need you to be very Pro-active and dedicated to completing this before the deadline.
+//------------------------
+D. What you will gain after this, if sucessful
+		This serves as a good training on how to build the CANSAT.
+		Building this will introduce you to a lot of new ideas.
+		This isnt like the modular task. It will be done mainly by yourself.
+--->>	Should you choose to accept. :)
+//------------------------

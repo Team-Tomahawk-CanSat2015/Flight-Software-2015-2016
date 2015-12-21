@@ -3,6 +3,7 @@ Adafruit_VC0706 cam = Adafruit_VC0706(&cameraconnection);
 
 /****************************************************************************/
 void takepicture (char* pictureName){
+  switch_off_servo();
   if (!SD.begin(10)){Serial.println("SD Error");}
   if (!cam.begin()) {Serial.println("Error Camera");}
   Serial.println ("Camera Activated");
@@ -53,6 +54,11 @@ void takepicture (char* pictureName){
     Serial.print("Total Time for Pic transfer = ");Serial.println(time); 
      }
   }
+
+  void switch_off_servo(){
+    
+    }
+
 
 /*void SendPictureonSerial(){
   int sec_count=0;

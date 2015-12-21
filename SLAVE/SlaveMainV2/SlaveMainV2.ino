@@ -10,8 +10,11 @@
 #include <SD.h>
 #include <SoftwareSerial.h> 
 #include <Adafruit_VC0706.h>
+#include <Servo.h>
 
 File myFile;
+Servo camserv;
+
 char curr_picfile;
 
 #define Active_LED 8
@@ -49,7 +52,7 @@ void setup(){
   Wire.begin(19);  // join I2C bus with address #19
   Wire.onReceive(receiveEvent);//"recieveevent" is called when slave recives data from master 
   Wire.onRequest(requestEvent);//"requestenevt" is called master requests data from this slave device.
-  
+  camserv.attach (6);
 }
 
 unsigned long pU_time = 0;

@@ -1,6 +1,6 @@
 /*Flight tasks that are important but cannot be really clasified are held in this file*/
 //Used to compile string and send string to radio serial
-void TransmitandSave_data (byte save){
+void TransmitandSave_data (byte save, char image[]){
   String radio = "";
   radio += TeamID; radio += ",";
   radio += packet_count; radio += ",";
@@ -33,8 +33,14 @@ void PerformRadiotask(){
     case '#':{ //#160 to change servo angle
     Serial.println ("--Recived Servo Command!!--");
     recv.remove (0, 1);
-    int serv_pos = recv.toInt();
-    CamServ.write (serv_pos);
+    byte serv_pos = recv.toInt();
+    //CamServ.write (serv_pos);
+   //---Send slave set servo to slave
+    Wire.beginTransmission(19);
+    byte toSlave_msg[] = {55, serv_pos}; ;
+    Wire.write(toSlave_msg, 2);
+    Wire.endTransmission(); 
+   
     break;}
     
     case'*':{ //* to take snapshot of camera
@@ -102,15 +108,29 @@ void RunImageTransmissionSequence(){
   
   else { //Image transmission sequence below 
     for(unsigned long jpglen=imgFile.size();jpglen>0;jpglen=jpglen-12000){//Break picture to 12Kb
-    uint8_t *buffer;
     int bytesToRead = min(12000, jpglen);//12 Kilobytes at a time
-    TransmitandSave_data(0);
-    while (--bytesToRead >= 0){Serial.write(imgFile.read());}
+    char img_buff [bytesToRead];
+    int j=-1;
+    while (--bytesToRead >= 0){
+      img_buff[--j] = imgFile.read();
+      }
+      //Update sensordata()
+      
+
+      
     delay (1000);
     }
    }   
     imgFile.close();
 }
+
+
+void Update_Slave_data () {}
+
+
+
+
+
 
 
 

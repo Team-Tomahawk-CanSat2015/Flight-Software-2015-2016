@@ -5,8 +5,8 @@ void loop(){Buzzer();}
 
 void Buzzer()
 {
-  tone (6, 262);
-  delay (4000);
-  noTone (6);
-  delay (5000);
+  tone (5, 262);
+  delay (2000);
+  noTone (5);
+  delay (1000);
 }

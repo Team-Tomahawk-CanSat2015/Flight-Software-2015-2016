@@ -10,9 +10,7 @@
 #include <SD.h>
 #include <Adafruit_Sensor.h>            
 #include <Adafruit_BMP085_U.h> 
-#include <Servo.h>
 File myFile;
-Servo CamServ;
 
 //Physical pin and adress setups in software
 #define RstPin 9
@@ -76,7 +74,7 @@ void setup(){
   pinMode(slaveusingSDPin, INPUT); //Setup pin indicator if slave is using SD card BUS
   Wire.begin(); //Setup I2C bus for slave
   boot();
-  CamServ.attach (6);
+  Serial.println ("--Master Start--");
 }
 
 /**
@@ -84,11 +82,12 @@ void setup(){
 * 1. Collect data from sensors and Slave Processor.
 * 2. Preform State-specific functions (actions and transitions check).
 * 3. Save State to memory.
-* 4. If a second has elapsed, Transmit and Save data to SD.
+* 4. If a second has elapsed,Check what transmission protocol to perform (4a or 4b)
+*    4a. Transmit standard packet without pic and Save data to SD.
+*    4b. Transmit Packet with image property attached, save standard packet to SD
 * 5. Perform Radio data task 
 **/
 void loop(){
-  
   if (digitalRead(memoryresetpin) == HIGH){ //If reset button is pressed
     delay (200);
     ClearEEPROMMemory();
@@ -128,19 +127,22 @@ void loop(){
 
   //3. Save State to memory
    // saveStatetoEEPROM();
-
-  //4. Check to see if image transmission sequence should begin
-   if (digitalRead(slaveusingSDPin) && previous_slaveusingSDPin)
-   RunImageTransmissionSequence (); //lol, such a long function name
   
-  //5. Transmit and Save data to SD.
+  //4. Transmit and Save data to SD.
     if (millis() - prevtrans_Time >= (1) *1000){ // 1 second telemetery transfer rate
-    prevtrans_Time = millis ();
-    ++packet_count;
-    TransmitandSave_data(1);
+      prevtrans_Time = millis ();
+      ++packet_count;
+      
+      if (!(digitalRead(slaveusingSDPin)==LOW && previous_slaveusingSDPin==HIGH)){
+  //4a. Standard packet Transmission and save
+        TransmitandSave_data(1, "0");}
+      else{
+  //4b. Image packet transmission loop
+        RunImageTransmissionSequence();}
     }
+
    
-  //6. Perform Radio data task
+  //5. Perform Radio data task
      bool did_RadioRecieve = getdatafromRadio(); 
      if  (did_RadioRecieve)  PerformRadiotask();
 

@@ -4,13 +4,12 @@
 void setup() {
  Wire.begin();
  Serial.begin(115200); delay (1000);
- Serial.print ("begin...");
+ Serial.println ("begin...");
 }
 
 
 void loop() 
 {
-  Serial.print ("ddd");
  unsigned long a_time = 0;
  geta_time(&a_time);//get the time data from RTC
  Serial.println (a_time);
@@ -42,6 +41,19 @@ void geta_time(unsigned long *a_time)
  second     = bcdToDec(Wire.read() & 0x7f);
  minute     = bcdToDec(Wire.read());
  hour       = bcdToDec(Wire.read() & 0x3f);  // Need to change this if 12 hour am/pm
+ 
+ Serial.print("The Time is: ");
+ Serial.print(hour); Serial.print(":");
+ Serial.print(minute); Serial.print(":");
+ Serial.println(second);
+ 
  *a_time = ((hour * 60 * 60) + (minute * 60) + (second));
 }
+
+
+
+
+
+
+
  

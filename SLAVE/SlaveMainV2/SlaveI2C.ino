@@ -22,14 +22,17 @@ void receiveEvent (int howMany){
   switch (Master_msg){
   case 10: {//Take picture case
   Serial.println ("--Taking Snapshot!--");
-  byte num_by = (byte)random (62, 122);
-  char buff;
-  String num = String(random (1, 9));
-  num += ".JPG";
-  const char* filestr = num.c_str();
   takepic = true;
   break;
   }
+
+  case 55: {//Take picture case
+  byte servopos = Wire.read();
+  Serial.print ("--Setting Servo Angle to: ");Serial.println(servopos);
+  camserv.write (servopos);
+  
+  }
+  
   
  }
 

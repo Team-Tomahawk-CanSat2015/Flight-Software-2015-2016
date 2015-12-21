@@ -1,4 +1,3 @@
-
 #include <Wire.h>
 
 // Declaring global variables for GPS telemetry. altitude, satnum, velocity, lon_deg, lat_deg
@@ -26,7 +25,8 @@ struct gpsDataUnit {
 
 void writeValues(){ // The function that executes whenever data is requested by master.
   a = gpsData.altitude; b = gpsData.satNum; 
-  c = gpsData.velocity; d = gpsData.lon_degrees; e = gpsData.lat_degrees;
+  c = gpsData.velocity; d = gpsData.lon_degrees;
+  e = gpsData.lat_degrees;
   
   alt.f = a; satnum.f = b; vel.f = c;
   lon_deg.f = d; lat_deg.f = e;
@@ -54,12 +54,14 @@ void setup()
   
   Serial.begin(9600);
 
+   
+
   //Set Fake GPS Data here
-  gpsData.altitude = 889;
-  gpsData.satNum = 3;
-  gpsData.velocity = 23.1;
-  gpsData.lon_degrees = 4.33;
-  gpsData.lat_degrees = -70.2;
+  gpsData.altitude = 77.22;
+  gpsData.satNum = 4;
+  gpsData.velocity = 33.1;
+  gpsData.lon_degrees = 49.33;
+  gpsData.lat_degrees = -79.2;
   delay(200);
 }
 

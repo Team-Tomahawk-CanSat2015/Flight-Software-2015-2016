@@ -1,5 +1,27 @@
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SoftwareSerial.h>
+#include <Adafruit_VC0706.h>
+ 
+File myFile;
+
 
 //Functions and data types***************
+struct gpsDataUnit {
+  float satTime[3];//0: Hours  1: Minutes 2: Seconds
+  float latitude[3];//0: Degree 1: Minutes 2: Direction
+  char latDir;
+  float longitude[3];//0: Degree 1: Minutes 2: Direction
+  char longDir;
+  float altitude;
+  char altUnit;
+  float satNum;
+  float velocity;
+  //----------------
+  float lon_degrees;
+  float lat_degrees;
+} gpsData;
 
 void callGPS(gpsDataUnit* Unit);
 void printStuff(gpsDataUnit* Unit);
@@ -12,25 +34,25 @@ const short HOUR = 0, MIN = 1, SEC = 2, DEGREE = 0, DIRECTION = 2;
 //***************************************
 
 
-//Default Arduino Code*******************
 /*
+//Default Arduino Code*******************
 void setup() {
   Serial.begin(9600);
   Serial.setTimeout(500);
 }
 
 void loop() {
+
+  if (Serial.available ()){
   callGPS(&gpsData);
   printStuff(&gpsData);
-
-  delay (3000);
+  }
 }
 */
 //***************************************
 
 void callGPS(struct gpsDataUnit* unit) {
   String data = Serial.readString();
-  Serial.print (data);
   Serial.flush();
   int index1 = data.indexOf("$GPGGA");
   int index2 = data.indexOf("$", index1 +1);

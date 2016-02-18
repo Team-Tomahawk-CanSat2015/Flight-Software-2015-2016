@@ -57,6 +57,22 @@ unsigned long prevtrans_Time =0, liftoff_time = 0;
 byte previous_slaveusingSDPin = 0;
 
 
+//Structure Definition
+struct gpsDataUnit {
+  long satTime[3];//0: Hours  1: Minutes 2: Seconds
+  long latitude[3];//0: Degree 1: Minutes 2: Direction
+  char latDir;
+  long longitude[3];//0: Degree 1: Minutes 2: Direction
+  char longDir;
+  long altitude;
+  char altUnit;
+  long satNum;
+  long velocity;
+  //----------------
+  long lon_degrees;
+  long lat_degrees;
+} gpsData;
+
 /**
 * Flight Software state variable:
 *  0 - initialize

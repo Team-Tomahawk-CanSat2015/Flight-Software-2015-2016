@@ -67,7 +67,7 @@ void rocketDeployment_Stabilization() {
   //FUNCTION TASK
   //TRANSITION CHECK
 
- if (Stable() == true || gpsData.altitude <= (groundAlt + 350)){
+ if (gpsData.altitude <= (groundAlt + 450)){
     state = 4;
     stateStartTime = a_time;
  }

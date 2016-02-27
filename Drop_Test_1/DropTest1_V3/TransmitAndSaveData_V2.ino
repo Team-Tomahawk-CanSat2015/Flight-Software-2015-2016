@@ -1,7 +1,5 @@
 void TransmitAndSaveData() {
   while ((millis() - TeleTime) < (long) 1000) {}
-
-  
   TeleArray[0] = packetCount;
   TeleArray[1] = gpsData.satTime;
   TeleArray[2] = gpsData.lat_degrees;
@@ -17,15 +15,13 @@ void TransmitAndSaveData() {
   TeleArray[12] = dofData.y_alpha;
   TeleArray[13] = dofData.z_alpha;
 
-String temp="";
+temp="";
   for (int i = 0; i <= 13; ++i) {
     temp+= (String) TeleArray[i] + ",";
     
     
   }
-  Serial.println(temp);
-  SavetoSD(temp);
-  delay(5000);
+
 
   TeleTime = millis();
   packetCount++;

@@ -8,7 +8,6 @@
 #include <SD.h>
 #include <SoftwareSerial.h>
 
-
 #define TeamID 1086
 
 //Structure Definition
@@ -43,15 +42,16 @@ Adafruit_BMP085_Unified       bmp   = Adafruit_BMP085_Unified(18001);
 Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
 float seaLevelPressure = SENSORS_PRESSURE_SEALEVELHPA;
 
+String temp="";
+
+const int chipSelect = 10;
 
 void setup() {
-  Serial.begin(19200);
+   Serial.begin(19200);
   //printLegend();
-
   
   //SD Setup//
   SD.begin(10);
-  
   
   //GPS Setup//
   softSer.begin(9600);
@@ -61,30 +61,18 @@ void setup() {
   Wire.begin();
   initilize_Adafruit_10_DOF_Sensors();
   //gyro.enableAutoRange(true);
-  
+
+  temp="*****************************************";
+  magicSD_save();
   
 }
 
 void loop() {
-
-
-  //callGPS(&gpsData);
+  callGPS(&gpsData);
   callDOF(&dofData);
   TransmitAndSaveData();
-
-
+  magicSD_save(); 
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

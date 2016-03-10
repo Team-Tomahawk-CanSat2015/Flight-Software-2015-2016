@@ -14,15 +14,20 @@ void TransmitAndSaveData() {
   TeleArray[11] = dofData.x_alpha;
   TeleArray[12] = dofData.y_alpha;
   TeleArray[13] = dofData.z_alpha;
+  TeleArray[14] = 0;
+  TeleArray[15] = 0;
+  TeleArray[16] = 0;
+  TeleArray[17] = 0;
+  TeleArray[18] = 0;
 
 temp="";
-  for (int i = 0; i <= 13; ++i) {
+  for (int i = 0; i <= 18; ++i) {
     temp+= (String) TeleArray[i] + ",";
     
     
   }
 
-
+Serial.println(temp);
   TeleTime = millis();
   packetCount++;
 

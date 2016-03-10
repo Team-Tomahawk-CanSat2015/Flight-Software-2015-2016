@@ -15,7 +15,8 @@
 struct gpsDataUnit {
   float satTime;
   float altitude;
-  //float satNum;
+  char altUnit;
+  float satNum;
   float velocity;
   float lon_degrees;
   float lat_degrees;

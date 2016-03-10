@@ -63,7 +63,7 @@ void setup() {
   //gyro.enableAutoRange(true);
 
   temp="*****************************************";
-  magicSD_save();
+  //magicSD_save();
   
 }
 
@@ -71,7 +71,8 @@ void loop() {
   callGPS(&gpsData);
   callDOF(&dofData);
   TransmitAndSaveData();
-  magicSD_save(); 
+  
+  //magicSD_save(); 
 }
 
 

@@ -10,7 +10,7 @@ const short HOUR = 0, MIN = 1, SEC = 2, DEGREE = 0, DIRECTION = 2;
 
 void callGPS(struct gpsDataUnit* unit) {
  
-  Adafruit_GPS GPS(&softSer);
+
 GPS.begin(9600);
 if (GPS.fix){
 unit->lat_degrees = GPS.latitudeDegrees;

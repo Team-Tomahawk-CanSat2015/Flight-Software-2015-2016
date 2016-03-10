@@ -2,7 +2,7 @@ void TransmitAndSaveData() {
   while ((millis() - TeleTime) < (long) 1000) {}
   TeleArray[0] = packetCount;
   TeleArray[1] = gpsData.satTime;
-  TeleArray[2] = gpsData.lat_degrees;
+  TeleArray[2] = 0;//gpsData.lat_degrees;
   TeleArray[3] = gpsData.lon_degrees;
   TeleArray[4] = gpsData.velocity;
   TeleArray[5] = dofData.Altitude;
@@ -20,7 +20,7 @@ temp="";
     temp+= (String) TeleArray[i] + ",";
   }
 
-
+Serial.println(temp);
   TeleTime = millis();
   packetCount++;
 

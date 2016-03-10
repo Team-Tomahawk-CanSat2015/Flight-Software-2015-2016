@@ -8,7 +8,7 @@ void SavetoSD(String datatosave) {
 
 void magicSD_save(){
  //NEVER TO BE TOUCHED,WERID THINGS ARE BOUND TO HAPPEN
-  File dataFile = SD.open("datalog.txt", FILE_WRITE);
+  File dataFile = SD.open("datalog1.txt", FILE_WRITE);
   // if the file is available, write to it:
   if (dataFile) {
     dataFile.println(temp);

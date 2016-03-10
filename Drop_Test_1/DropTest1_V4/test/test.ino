@@ -44,6 +44,8 @@ Adafruit_BMP085_Unified       bmp   = Adafruit_BMP085_Unified(18001);
 Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
 float seaLevelPressure = SENSORS_PRESSURE_SEALEVELHPA;
 
+Adafruit_GPS GPS(&softSer);
+
 String temp="";
 
 const int chipSelect = 10;
@@ -57,15 +59,15 @@ void setup() {
   
   //GPS Setup//
   softSer.begin(9600);
-  softSer.setTimeout(500);
+  //softSer.setTimeout(500);
   
   //DOF Setup//
   Wire.begin();
   initilize_Adafruit_10_DOF_Sensors();
   //gyro.enableAutoRange(true);
 
-  temp="*****************************************";
-  magicSD_save();
+  Serial.println("*****************************************");
+  //magicSD_save();
   
 }
 
@@ -73,7 +75,9 @@ void loop() {
   callGPS(&gpsData);
   callDOF(&dofData);
   TransmitAndSaveData();
-  magicSD_save(); 
+  Serial.print(temp);
+  Serial.println("*****************************************");
+  //magicSD_save(); 
 }
 
 

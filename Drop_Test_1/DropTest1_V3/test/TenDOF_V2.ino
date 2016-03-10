@@ -37,7 +37,7 @@ void adafruit_function (float *y_alpha, float *x_alpha, float *z_alpha, float *A
   { float Temp;
     bmp.getTemperature(&Temp);
     *Temperature = Temp;
-    //*Altitude = bmp.pressureToAltitude(seaLevelPressure, bmp_event.pressure, Temp);
+    *Altitude = bmp.pressureToAltitude(seaLevelPressure, bmp_event.pressure, Temp);
     *Pressure = bmp_event.pressure;
     //z_rollrate = gyro_event.gyro.z; //rad/s
     //*z_rollrate = (gyro_event.gyro.z) * (180 / 3.142); //deg/s

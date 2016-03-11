@@ -1,9 +1,7 @@
-#include <Wire.h>
-#include <SPI.h>
-#include <SD.h>
+
 #include <SoftwareSerial.h>
 
- SoftwareSerial GpsSerial(8, 9); // RX, TX
+ SoftwareSerial GpsSerial(4, 5); // RX, TX
 
 
 //Functions and data types***************
@@ -52,7 +50,7 @@ void loop() {
 
 void callGPS(struct gpsDataUnit* unit) {
   String data = GpsSerial.readString();
-  Serial.print (data);
+  //Serial.print (data);
   GpsSerial.flush();
   int index1 = data.indexOf("$GPGGA");
   int index2 = data.indexOf("$", index1 +1);
@@ -129,7 +127,7 @@ void callGPS(struct gpsDataUnit* unit) {
   index1 = data.indexOf("$GPVTG");
   index2 = data.indexOf("$", index1 +1);
   String VTG = data.substring(index1, index2);
-  Serial.println(VTG);
+  //Serial.println(VTG);
   VTG.remove(0, VTG.indexOf(",")+1);
   VTG.remove(0, VTG.indexOf(",")+1);
   VTG.remove(0, VTG.indexOf(",")+1);
@@ -137,7 +135,7 @@ void callGPS(struct gpsDataUnit* unit) {
   VTG.remove(0, VTG.indexOf(",")+1);
   VTG.remove(0, VTG.indexOf(",")+1);
   VTG.remove(0, VTG.indexOf(",")+1);
-  Serial.println(VTG);
+  //Serial.println(VTG);
   unit->velocity = VTG.toFloat()*0.27777772;// to m/s
 
   if (unit->satNum == 0){

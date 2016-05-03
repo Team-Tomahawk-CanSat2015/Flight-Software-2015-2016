@@ -1,3 +1,5 @@
+
+
 /* 
 * ---Team Tomahawk Flight Software for Master Processor---
 * File contains the core flight software loop
@@ -9,7 +11,8 @@
 #include <SPI.h>
 #include <SD.h>
 #include <Adafruit_Sensor.h>            
-#include <Adafruit_BMP085_U.h> 
+#include <Adafruit_BMP085_U.h>
+#include <EEPROM.h>
 File myFile;
 
 //Physical pin and adress setups in software
@@ -55,7 +58,7 @@ unsigned long a_time, a_date; //Actual time and date
 unsigned long initialize_time = 0;
 unsigned long prevtrans_Time =0, liftoff_time = 0;
 byte previous_slaveusingSDPin = 0;
-
+int eeAddress_W = 0;
 
 //Structure Definition
 struct gpsDataUnit {

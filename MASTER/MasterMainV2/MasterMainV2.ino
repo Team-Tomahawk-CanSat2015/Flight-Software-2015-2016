@@ -24,6 +24,7 @@ File myFile;
 #define DS1307_I2C_ADDRESS 0x68  // the I2C address of RTC
 #define slaveusingSDPin 7
 #define Slave_I2C_Adress 19
+#define EEPROM_ID 0x50
 
 unsigned long packet_count = 0;
 int state = 0;
@@ -59,6 +60,7 @@ unsigned long initialize_time = 0;
 unsigned long prevtrans_Time =0, liftoff_time = 0;
 byte previous_slaveusingSDPin = 0;
 int eeAddress_W = 0;
+int EXTeeAddress_W = 0;
 
 //Structure Definition
 struct gpsDataUnit {

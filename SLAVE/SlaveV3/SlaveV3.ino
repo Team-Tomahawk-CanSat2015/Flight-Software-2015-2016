@@ -4,7 +4,7 @@
 #include <SoftwareSerial.h> 
 
 //-----------------Global Variable---------------------------
-SoftwareSerial cameraconnection = SoftwareSerial(2, 3);
+SoftwareSerial cameraconnection = SoftwareSerial(4, 3);
 Adafruit_VC0706 cam = Adafruit_VC0706(&cameraconnection);
 int latestPicNum = 0;
 int lastPicNum = -1;
@@ -19,10 +19,39 @@ int SERIAL_FREE_PIN = 5;//Change this to the correct PIN------------------------
 void setup() {
   Serial.begin(19200);
   //Camera Setup
-  cam.begin();
+  if (cam.begin()) {
+    Serial.println("Camera Found:");
+  } else {
+    Serial.println("No camera found?");
+    return;
+  }
+  delay(100);
+  char *reply = cam.getVersion();
+  if (reply == 0) {
+    Serial.print("Failed to get version");
+  } else {
+    Serial.println("-----------------");
+    Serial.print(reply);
+    Serial.println("-----------------");
+  }
+  
+
   cam.setImageSize(VC0706_640x480);
+  delay(100);
+  uint8_t imgsize = cam.getImageSize();
+  Serial.print("Image size: ");
+  if (imgsize == VC0706_640x480) Serial.println("640x480");
+  if (imgsize == VC0706_320x240) Serial.println("320x240");
+  if (imgsize == VC0706_160x120) Serial.println("160x120");
   //Pin Initialization
   pinMode(SERIAL_FREE_PIN, INPUT);//HIGH = Serial in Use, LOW = Serial Free
+
+
+  //Take Picture on Start
+  TakePicture();
+  SetFileName();
+  WriteFileToSD();
+  
 }
 
 void loop() {
@@ -39,11 +68,7 @@ void loop() {
     TransmitSegment();
     lastPicNum = latestPicNum;
     
-    delay(30);//We need some kind of a delay here so that is doesn't try to
-  //transmit another image segment before the Master has the chance to
-  //transmit another telemetry packet. There's definitly a better way to 
-  //do this than a delay, but I threw this in as a place holder until 
-  //monday.
+    
   
   }
 

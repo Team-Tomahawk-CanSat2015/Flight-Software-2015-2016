@@ -6,11 +6,11 @@ void TransmitSegment(){
   }
 
   //Selects file to transmit
-  strcpy(readName, "IMAGE00_00.JPG");
-  readName[5] = '0' + latestPicNum / 10;
-  readName[6] = '0' + latestPicNum % 10;
-  readName[8] = '0' + segment / 10;
-  readName[9] = '0' + segment % 10;
+  strcpy(readName, fileName);
+  readName[0] = '0' + latestPicNum / 10;
+  readName[1] = '0' + latestPicNum % 10;
+  readName[3] = '0' + segment / 10;
+  readName[4] = '0' + segment % 10;
 
   //Opens File Segment
   File readFile;

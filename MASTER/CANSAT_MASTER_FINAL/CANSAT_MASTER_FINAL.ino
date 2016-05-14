@@ -18,6 +18,9 @@ SoftwareSerial GpsSerial(7, 8); // RX, TX
 #define TMP36Pin A3
 #define DS1307_I2C_ADDRESS 0x68  // the I2C address of Tiny RTC
 #define CommunicationPin 9 //High when Slave is using it else low
+#define EEPROM_ID 0x50
+#define EEPROM_LocationAddress 0 //0 to 31
+
 
 //Global Variables
 //Telemetery variables
@@ -25,7 +28,7 @@ unsigned long MissionTime;
 unsigned long PacketCount;
 const int SensorDataSize = 12;
 float SensorData[SensorDataSize];
-int eeAddress_W = 0;
+long eeAddress_W = 0;
 bool NichromeActive = false;
 int NichromeActiveCount = 0;
 int NichromeBurnDuration = 15;
@@ -70,7 +73,8 @@ void setup() {
   pinMode(NichromeBurnPin,OUTPUT);
   digitalWrite(NichromeBurnPin,LOW);
 
-
+  //Gets External EEPROM Location
+  EEPROM.get(EEPROM_LocationAddress, eeAddress_W);
 
   //Buzzer FeedBack
   Buzzer_feedback();  
@@ -136,7 +140,7 @@ void PerformRadioTask(){
   }
 
 void SaveTelemetery(){
-  EEPROMWrite(SensorData,SensorDataSize);
+  extEEPROMWrite(SensorData,SensorDataSize);
   }
 
   void UpdateBatteryVoltage(){

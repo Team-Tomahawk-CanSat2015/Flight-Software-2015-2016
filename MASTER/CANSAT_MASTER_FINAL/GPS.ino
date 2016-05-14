@@ -1,53 +1,3 @@
-
-#include <SoftwareSerial.h>
-
- SoftwareSerial GpsSerial(7, 8); // RX, TX
-
-
-//Functions and data types***************
-struct gpsDataUnit {
-  float satTime[3];//0: Hours  1: Minutes 2: Seconds
-  float latitude[3];//0: Degree 1: Minutes 2: Direction
-  char latDir;
-  float longitude[3];//0: Degree 1: Minutes 2: Direction
-  char longDir;
-  float altitude;
-  char altUnit;
-  float satNum;
-  float velocity;
-  //----------------
-  float lon_degrees;
-  float lat_degrees;
-} gpsData;
-
-void callGPS(gpsDataUnit* Unit);
-void printStuff(gpsDataUnit* Unit);
-//***************************************
-
-
-//Global Variabes************************
-//gpsDataUnit gpsData;
-const short HOUR = 0, MIN = 1, SEC = 2, DEGREE = 0, DIRECTION = 2; 
-//***************************************
-
-
-//Default Arduino Code*******************
-void setup() {
-  GpsSerial.begin(9600);
-  Serial.begin(9600);
-  GpsSerial.setTimeout(400);
-}
-
-void loop() {
-
-  if (GpsSerial.available ()){
-  Serial.print ("Data is available!");
-  callGPS(&gpsData);
-  printStuff(&gpsData);
-  }
-}
-//***************************************
-
 void callGPS(struct gpsDataUnit* unit) {
   String data = GpsSerial.readString();
   //Serial.print (data);
@@ -119,7 +69,7 @@ void callGPS(struct gpsDataUnit* unit) {
   //Altitude
   GGA.remove(0,GGA.indexOf(",")+1);
   GGA.remove(0,GGA.indexOf(",")+1);
-  unit->altitude = GGA.toFloat();
+  unit->GPSaltitude = GGA.toFloat();
   GGA.remove(0, GGA.indexOf(",")+1);
   unit->altUnit = GGA.charAt(0);
 
@@ -142,7 +92,7 @@ void callGPS(struct gpsDataUnit* unit) {
     unit-> lat_degrees = 999;
     unit-> lon_degrees = 999;
     unit-> velocity = 999;
-    unit-> altitude = -999;
+    unit-> GPSaltitude = -999;
     }
 }
 
@@ -173,7 +123,7 @@ void printStuff(struct gpsDataUnit* unit) {
   Serial.println(unit -> latDir);*/
 
    Serial.print("Altitude: ");
-   Serial.print(unit->altitude);
+   Serial.print(unit->GPSaltitude);
    Serial.print(" ");
    Serial.println(unit->altUnit);
 
@@ -186,16 +136,5 @@ void printStuff(struct gpsDataUnit* unit) {
    Serial.println();
    Serial.println();
 }
-
-
-
-
-
-
-
-
-
-
-
 
 

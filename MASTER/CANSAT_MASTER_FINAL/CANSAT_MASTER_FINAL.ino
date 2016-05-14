@@ -5,6 +5,9 @@
 #include <SFE_BMP180.h>
 #include <Wire.h> 
 #include <EEPROM.h>
+#include <SoftwareSerial.h>
+#include"GPS.h"
+ SoftwareSerial GpsSerial(7, 8); // RX, TX
 
 
 //Marcos
@@ -28,6 +31,9 @@ int NichromeActiveCount = 0;
 int NichromeBurnDuration = 15;
 
 unsigned long PreviousSendTime = 0;
+int StageNumber;
+int ReleaseAltitude = 450; //450 meters
+int GroundAproximationAltitude = 50; //50meters 
 /*
 //TELEMETERY FORMAT
  * 1. Team ID.
@@ -52,14 +58,22 @@ void setup() {
   Serial.begin(19200); //Begin Serial
   delay(500);
 
+  //Initialize BMP 180 Pressure and Temperature sensor
+  Wire.begin();
+  initialize_BMP180();
+
+  //Initialize GPS
+  GpsSerial.begin(9600);
+  GpsSerial.setTimeout(400);
+
+  //Initialize output pins
   pinMode(NichromeBurnPin,OUTPUT);
   digitalWrite(NichromeBurnPin,LOW);
 
-  Buzzer_feedback();
-  
-  Wire.begin();
-  initialize_BMP180();
-   
+
+
+  //Buzzer FeedBack
+  Buzzer_feedback();  
 }
 
 void loop() {
@@ -101,7 +115,7 @@ void UpdateTelemetery (){
   UpdateMissionTime();
   UpdatePitotSensor();
   UpdateBatteryVoltage();
-  //UpdateGPSData();
+  UpdateGPSData();
 }
 
 void PerformRadioTask(){
@@ -148,9 +162,15 @@ void SaveTelemetery(){
   NichromeActive = false;
   }
 
-  void TakeSnapshot(){
-    
-    
+  void TakeSnapshot(){}
+
+  void UpdateGPSData () {
+    if (GpsSerial.available ()){
+      //Serial.print ("GPS Data is available!");
+      callGPS(&gpsData);
+      printStuff(&gpsData);
+      delay(1000);
+      }
   }
 
 

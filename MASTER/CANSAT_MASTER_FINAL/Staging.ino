@@ -5,7 +5,7 @@ void UpdateStaging (){
     case(1):   
     //Transition condition, If altitude ever exceeds release altitude
     if (abs(SensorData[0]) > abs(ReleaseAltitude) ){
-      ++StageNumber
+      ++StageNumber;
      }
     break;
     //.STAGE 2. Transition Stage:: Stage tasks: Do nothing
@@ -18,19 +18,19 @@ void UpdateStaging (){
     //.STAGE 2. second Below 400m again ,Release stage
     case(3): 
     //Transition condition, If altitude ever exceeds release altitude
-    if (abs(SensorData[0]) < BuzzerStart ){
+    if (abs(SensorData[0]) < GroundAproximationAltitude ){
       ++StageNumber;
      }
     break;
     // .STAGE 2. Stable on ground, Landed stage
     case(4):  
-    buzzer();
+    Buzzer();
     //No transition
     break;
     
     
     default: 
-      1+1
+      1+1; //Do Nothing
     break;
     
     

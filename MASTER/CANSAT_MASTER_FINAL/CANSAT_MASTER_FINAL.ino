@@ -7,7 +7,7 @@
 #include <EEPROM.h>
 #include <SoftwareSerial.h>
 #include"GPS.h"
- SoftwareSerial GpsSerial(7, 8); // RX, TX
+SoftwareSerial GpsSerial(7, 8); // RX, TX
 
 
 //Marcos
@@ -166,10 +166,9 @@ void SaveTelemetery(){
 
   void UpdateGPSData () {
     if (GpsSerial.available ()){
-      //Serial.print ("GPS Data is available!");
       callGPS(&gpsData);
-      printStuff(&gpsData);
-      delay(1000);
+      //printStuff(&gpsData);
+      assignGPS(&gpsData);   
       }
   }
 

@@ -137,4 +137,30 @@ void printStuff(struct gpsDataUnit* unit) {
    Serial.println();
 }
 
+void assignGPS(struct gpsDataUnit* unit) {
+  SensorData[5] = unit->lat_degrees;// * 10. GPS latitude[5]
+  SensorData[6] = unit->lon_degrees;//* 11. GPS longitude.[6]
+  SensorData[7] = unit->GPSaltitude;//* 12. GPS Altitude.[7]
+  SensorData[8] = unit->satNum;//* 13. GPS Satlite number.[8]
+  SensorData[9] = unit->velocity;//* 14. GPS speed.[9]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -41,9 +41,9 @@ void setup() {
 void loop() {
 
   if (GpsSerial.available ()){
-  Serial.print ("Data is available!");
+  //Serial.print ("Data is available!");
   callGPS(&gpsData);
-  printStuff(&gpsData);
+  //printStuff(&gpsData);
   }
 }
 //***************************************

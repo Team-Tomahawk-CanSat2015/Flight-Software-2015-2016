@@ -20,10 +20,10 @@
 //                 Writing Float Arrays to EEPROM                    //
 ///////////////////////////////////////////////////////////////////////
 
-void extEEPROMRead() {
+void extEEPROMRead(long numValues) {
   float value;
   long eeAddress_R = 0;
-  long numValues = 64000; //256000 / sizeof(float)
+  //long numValues = 64000; //256000 / sizeof(float)
   for (long i = 0; i < numValues; i++) {
     if (eeAddress_R + sizeof(float) >= 256000) {
       eeAddress_R = 0;

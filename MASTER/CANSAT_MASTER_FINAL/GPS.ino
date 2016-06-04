@@ -1,166 +1,53 @@
-void callGPS(struct gpsDataUnit* unit) {
-  String data = GpsSerial.readString();
-  //Serial.print (data);
-  GpsSerial.flush();
-  int index1 = data.indexOf("$GPGGA");
-  int index2 = data.indexOf("$", index1 +1);
-  float temp;
-  
-  //ParseGGA
-  String GGA = data.substring(index1, index2);
-  GGA.remove(0, 7);
+boolean usingInterrupt = false;
+void useInterrupt(boolean);
 
-  
-  //ParseTime
-  /*
-  temp = GGA.toFloat();
-  unit->satTime[HOUR] = (int) temp / 10000;
-  temp -= unit->satTime[HOUR] *10000;
-  unit->satTime[MIN] = (int)temp / 100;
-  temp -= unit-> satTime[MIN] * 100;
-  unit->satTime[SEC] = temp;
-  */
+void setupGPS(){ //To Set up GPS as Just like the ada fruit libary
+  GPS.begin(9600);
+  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);   
+  GPS.sendCommand(PGCMD_ANTENNA);
+  useInterrupt(true);
+}
 
 
-  //Lat+Long
-  GGA.remove(0,GGA.indexOf(",")+1);
-  temp = GGA.toFloat();
-  unit->latitude[DEGREE] = int(temp)/ 100;
-  unit->latitude[MIN]= temp - unit->latitude[DEGREE] * 100;
-  
-  GGA.remove(0, GGA.indexOf(",")+1);
-  unit->latDir = GGA.charAt(0);
-  if (unit->latDir == 'N'){
-  unit->latitude[DIRECTION] = 1;
-  } else if (unit->latDir == 'E'){
-   unit->latitude[DIRECTION] = 2;
-  } else if (unit->latDir == 'S'){
-   unit->latitude[DIRECTION] = 3;
-  } else if (unit->latDir == 'W'){
-   unit->latitude[DIRECTION] = 4;
+SIGNAL(TIMER0_COMPA_vect) {
+  char c = GPS.read();
+  #ifdef UDR0
+    if (GPSECHO)
+      float useless_value = 1;  //if (c) UDR0 = c;<--TO PRINT OUT FULL NNMEA SENTENCE--PLS DO NOT DELETE  
+  #endif
+}
+void useInterrupt(boolean v) {
+  if (v) {
+    OCR0A = 0xAF;
+    TIMSK0 |= _BV(OCIE0A);
+    usingInterrupt = true;
+  } else {
+    TIMSK0 &= ~_BV(OCIE0A);
+    usingInterrupt = false;
   }
-  
-  GGA.remove(0, GGA.indexOf(",")+1);
-  temp = GGA.toFloat();
-  unit->longitude[DEGREE] = (int) temp /100;
-  unit->longitude[MIN] = temp - unit->longitude[DEGREE]*100;
-  GGA.remove(0, GGA.indexOf(",")+1);
-  unit->longDir = GGA.charAt(0);
-   if (unit->longDir == 'N'){
-   unit->longitude[DIRECTION] = 1;
-  } else if (unit->longDir == 'E'){
-   unit->longitude[DIRECTION] = 2;
-  } else if (unit->longDir == 'S'){
-   unit->longitude[DIRECTION] = 3;
-  } else if (unit->longDir == 'W'){
-   unit->longitude[DIRECTION] = 4;
+}
+
+
+void UpdateGPSData(){
+  GPS.newNMEAreceived();
+  GPS.parse(GPS.lastNMEA());
+  if (GPS.fix >= 1) {
+    SensorData[5] = GPS.latitudeDegrees;//* 10. GPS latitude[5]
+    SensorData[6] = GPS.longitudeDegrees;//* 11. GPS longitude.[6]
+    SensorData[7] = GPS.satellites;//* 12. GPS Altitude.[7]
+    SensorData[8] = GPS.fix;//* 13. GPS Satlite number.[8]
+    SensorData[9] = GPS.speed;//* 14. GPS speed.[9]
   }
-
-  //Gps latitude and longitude to degrees
-  unit->lon_degrees = unit->latitude[DEGREE]+ (0.0166666 * unit->latitude[MIN] );
-  unit->lat_degrees = unit->longitude[DEGREE]+(0.0166666 * unit->longitude[MIN] );
-
+  else 
+  {
+  SensorData[5] = 0;
+  SensorData[6] = 0;
+  SensorData[7] = 0;
+  SensorData[8] = 0;
+  SensorData[9] = 0;
   
-  //Number of Satalites
-  GGA.remove(0, GGA.indexOf(",")+1);
-  GGA.remove(0, GGA.indexOf(",")+1);
-  unit->satNum = GGA.toFloat();
-
-  //Altitude
-  GGA.remove(0,GGA.indexOf(",")+1);
-  GGA.remove(0,GGA.indexOf(",")+1);
-  unit->GPSaltitude = GGA.toFloat();
-  GGA.remove(0, GGA.indexOf(",")+1);
-  unit->altUnit = GGA.charAt(0);
-
-  //ParseVTG
-  index1 = data.indexOf("$GPVTG");
-  index2 = data.indexOf("$", index1 +1);
-  String VTG = data.substring(index1, index2);
-  //Serial.println(VTG);
-  VTG.remove(0, VTG.indexOf(",")+1);
-  VTG.remove(0, VTG.indexOf(",")+1);
-  VTG.remove(0, VTG.indexOf(",")+1);
-  VTG.remove(0, VTG.indexOf(",")+1);
-  VTG.remove(0, VTG.indexOf(",")+1);
-  VTG.remove(0, VTG.indexOf(",")+1);
-  VTG.remove(0, VTG.indexOf(",")+1);
-  //Serial.println(VTG);
-  unit->velocity = VTG.toFloat()*0.27777772;// to m/s
-
-  if (unit->satNum == 0){
-    unit-> lat_degrees = 999;
-    unit-> lon_degrees = 999;
-    unit-> velocity = 999;
-    unit-> GPSaltitude = -999;
-    }
+  }
+   
 }
-
-//Time/Position/Fix Information Parsing Function
-void printStuff(struct gpsDataUnit* unit) {
-
-  /*Serial.print("Time: ");
-  Serial.print(unit -> satTime[HOUR]);
-  Serial.print(" : ");
-  Serial.print(unit -> satTime[MIN]);
-  Serial.print(" : ");
-  Serial.println(unit -> satTime[SEC]);*/
-
-  Serial.print("Longitude: ");
-  Serial.println(unit->lon_degrees);
-  /*Serial.print(unit->longitude[DEGREE]);
-  Serial.print("'");
-  Serial.print(unit->longitude[MIN]);
-  Serial.print(" ");
-  Serial.println(unit -> longDir);*/
-
-  Serial.print("Latitude in deg: "); 
-   Serial.println(unit->lat_degrees);
-  /*Serial.print(unit->latitude[DEGREE]);
-  Serial.print("'");
-  Serial.print(unit->latitude[MIN]);
-  Serial.print(" ");
-  Serial.println(unit -> latDir);*/
-
-   Serial.print("Altitude: ");
-   Serial.print(unit->GPSaltitude);
-   Serial.print(" ");
-   Serial.println(unit->altUnit);
-
-   Serial.print("Number of Satalite Connections: ");
-   Serial.println(unit->satNum);
-
-   Serial.print("Velocity (m/s): ");
-   Serial.println(unit->velocity);
-
-   Serial.println();
-   Serial.println();
-}
-
-void assignGPS(struct gpsDataUnit* unit) {
-  SensorData[5] = unit->lat_degrees;// * 10. GPS latitude[5]
-  SensorData[6] = unit->lon_degrees;//* 11. GPS longitude.[6]
-  SensorData[7] = unit->GPSaltitude;//* 12. GPS Altitude.[7]
-  SensorData[8] = unit->satNum;//* 13. GPS Satlite number.[8]
-  SensorData[9] = unit->velocity;//* 14. GPS speed.[9]
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

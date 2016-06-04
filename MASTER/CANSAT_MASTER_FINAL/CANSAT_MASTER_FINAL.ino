@@ -5,26 +5,35 @@
 #include <SFE_BMP180.h>
 #include <Wire.h> 
 #include <EEPROM.h>
+#include <Adafruit_GPS.h> 
 #include <SoftwareSerial.h>
-#include"GPS.h"
-SoftwareSerial GpsSerial(7, 8); // RX, TX
+
+SoftwareSerial mySerial(7, 8); // RX, TX
+Adafruit_GPS GPS(&mySerial); 
+#define GPSECHO  true 
+
 
 
 //Marcos
+#define USE_INTEEPROM //To activate Internal EEPROM, //Commented out to preserve write cycle
+#define USE_EXTEEPROM //To activate Internal EEPROM, //Commented out to preserve write cycle
 #define TEAMID 6643
 #define NichromeBurnPin 10
 #define BuzzerPin 9
 #define VoltagePin A0
+#define PitotPin A1
 #define TMP36Pin A3
 #define DS1307_I2C_ADDRESS 0x68  // the I2C address of Tiny RTC
 #define CommunicationPin 9 //High when Slave is using it else low
 #define EEPROM_ID 0x50
 #define EEPROM_LocationAddress 0 //0 to 31
+#define EEPROM_StageAdress 40
+#define SnapshotPin 5
 
 
 //Global Variables
 //Telemetery variables
-unsigned long MissionTime;
+int MissionTime;
 unsigned long PacketCount;
 const int SensorDataSize = 12;
 float SensorData[SensorDataSize];
@@ -34,9 +43,11 @@ int NichromeActiveCount = 0;
 int NichromeBurnDuration = 15;
 
 unsigned long PreviousSendTime = 0;
-int StageNumber;
+byte StageNumber;
 int ReleaseAltitude = 450; //450 meters
 int GroundAproximationAltitude = 50; //50meters 
+int AltitudeFilterOffset = 3;
+unsigned long MissionTimeaddr = 13 + sizeof (unsigned long);
 /*
 //TELEMETERY FORMAT
  * 1. Team ID.
@@ -57,40 +68,50 @@ int GroundAproximationAltitude = 50; //50meters
  */
 
 void setup() {
-  Serial.println("Begin...");
+  SetupNichrome();//Initialize NichromePin
+  
   Serial.begin(19200); //Begin Serial
-  delay(500);
+  delay(100);
 
   //Initialize BMP 180 Pressure and Temperature sensor
   Wire.begin();
   initialize_BMP180();
 
   //Initialize GPS
-  GpsSerial.begin(9600);
-  GpsSerial.setTimeout(400);
+  setupGPS();
 
-  //Initialize output pins
-  pinMode(NichromeBurnPin,OUTPUT);
-  digitalWrite(NichromeBurnPin,LOW);
-
-  //Gets External EEPROM Location
-  EEPROM.get(EEPROM_LocationAddress, eeAddress_W);
+  //Setup EEPROM logging
+  //eeAddress_W = 0; //To Start From The Begining, Use When testing
+  EEPROM.get(EEPROM_LocationAddress, eeAddress_W);//Gets External EEPROM Location//Uncomment for actual Flight
+  //extEEPROMRead(2*900);while (1==1){}  //If you want to read first 1000 digits in External EEPROM
+  SaveTelemetery();SaveTelemetery();
+  
 
   //Buzzer FeedBack
-  Buzzer_feedback();  
+  Buzzer_feedback(); 
+ 
+
+
+  //Setup SnapSHot Pin
+  pinMode(SnapshotPin, OUTPUT);
+  digitalWrite(SnapshotPin, LOW); 
+
+  //Initialize mission timer
+  //EEPROM_writeAnything(MissionTimeaddr,0);
 }
 
 void loop() {
   UpdateTelemetery ();
   UpdateStaging();
-  
+
   if(millis()-PreviousSendTime>1000){
     digitalWrite(CommunicationPin,HIGH);
     SendTelemetery ();
-    //SaveTelemetery(); //Commented our to preserver write cycle
+    SaveTelemetery(); 
     PreviousSendTime=millis();
     ++NichromeActiveCount;
     digitalWrite(CommunicationPin,LOW);
+    if (MissionTime - SensorData[10] > 10){digitalWrite(SnapshotPin, LOW); }
   }
   
   if (Serial.available()){PerformRadioTask();}
@@ -99,22 +120,27 @@ void loop() {
 }
 
 
-/*************************
- * MORE USER DEFINED FUNCTIONS *
- * **********************/
-void SendTelemetery(){
+/***********************************
+ * USER DEFINED FUNCTIONS ARE BELOW*
+ * *********************************/
+void SendTelemetery(){ //To compile and Send Telemetery on Main Serial
   Serial.print(TEAMID); Serial.print(",");
   Serial.print(MissionTime);Serial.print(",");
   Serial.print(++PacketCount);Serial.print(",");
   
   for (int i=0; i<SensorDataSize; ++i){
-    Serial.print(SensorData[i]);Serial.print(",");
+    if (i==5||i==6||i==7 ){ //Print to 6 decimal places for GPS presicion
+      Serial.print(SensorData[i],8);Serial.print(",");
+     }
+     else{
+       Serial.print(SensorData[i],3);Serial.print(",");
+     }
   }
   Serial.println();
     
 }
 
-void UpdateTelemetery (){
+void UpdateTelemetery (){ //Updates all sensor data that are required for telemetery
   UpdateBMP180();
   UpdateMissionTime();
   UpdatePitotSensor();
@@ -122,28 +148,39 @@ void UpdateTelemetery (){
   UpdateGPSData();
 }
 
-void PerformRadioTask(){
+void PerformRadioTask(){ //Performs Tasks Recived of serial which is connected to Radio
   SensorData[11] = SensorData[11] + 1.00;
   SensorData[10] =(float) MissionTime;
   String RadioRecieve = Serial.readString();
 
   if (RadioRecieve.indexOf("%") != -1){//Nichrome burn Command recoeved
     NichromeBurnBaBBY();
-    }
-
-   if (RadioRecieve.indexOf("$") != -1){//Take snap shot command recieved
+   }
+  else if (RadioRecieve.indexOf("*") != -1){//Take snap shot command recieved
     TakeSnapshot();
-   }  
-
+  }  
+  else if (RadioRecieve.indexOf("@") != -1){//Take snap shot command recieved
+    Buzzer_Command();
+  }
+  Serial.println (RadioRecieve);
     
   
   }
 
-void SaveTelemetery(){
-  extEEPROMWrite(SensorData,SensorDataSize);
+void SaveTelemetery(){ //Compiles and Saves Telemetery data to External EEPROM
+  #ifdef USE_EXTEEPROM
+  float DatatoExtEEPROM [SensorDataSize+3];
+  DatatoExtEEPROM[0] = TEAMID;
+  DatatoExtEEPROM[1] = MissionTime;
+  DatatoExtEEPROM[2] = PacketCount;
+  for (int k=0;k<SensorDataSize;++k){
+    DatatoExtEEPROM[k+3] = SensorData[k]; 
+  }
+  extEEPROMWrite(DatatoExtEEPROM,SensorDataSize+3);
+  #endif
   }
 
-  void UpdateBatteryVoltage(){
+ void UpdateBatteryVoltage(){ //Battery Voltage divider measurment Sensor Calculation
    float R1 = 7500;
    float R2 = 10000;
    SensorData[4] =  ((analogRead(VoltagePin)/1024.00)*(R1+R2)* 5.00)/R2;
@@ -151,31 +188,34 @@ void SaveTelemetery(){
 
 
 
- void NichromeBurnBaBBY (){
+ void NichromeBurnBaBBY (){ //Start A Nichrome burn
+  Buzzer_Command();
+  SensorData[11] = SensorData[11] + 1.00;
+  SensorData[10] =(float) MissionTime;
   NichromeActiveCount = 0;
   digitalWrite(NichromeBurnPin,HIGH);
   NichromeActive = true;
   }
 
- void NichromeStopBaBBY (){
+ void NichromeStopBaBBY (){ //Stop A nichrome Burn
   SensorData[11] = SensorData[11] + 1.00;
   SensorData[10] =(float) MissionTime;
-  
   NichromeActiveCount = 0;
   digitalWrite(NichromeBurnPin,LOW);
   NichromeActive = false;
+  Buzzer_Command();
   }
 
-  void TakeSnapshot(){}
+  void TakeSnapshot(){
+    digitalWrite(SnapshotPin, HIGH); 
+    }
 
-  void UpdateGPSData () {
-    if (GpsSerial.available ()){
-      callGPS(&gpsData);
-      //printStuff(&gpsData);
-      assignGPS(&gpsData);   
-      }
+
+  void SetupNichrome(){
+    //Initialize output pins
+    pinMode(NichromeBurnPin,OUTPUT);
+    digitalWrite(NichromeBurnPin,LOW);
   }
-
 
 
 

@@ -28,7 +28,12 @@ unsigned long geta_time(){
 }
 
 void UpdateMissionTime (){
-  MissionTime = ceil(millis())/1000;
+  int e;
+  EEPROM.get(MissionTimeaddr, e);
+  MissionTime = e/26;
+  EEPROM.put(MissionTimeaddr,e+1);
+
+  
 }
 
 

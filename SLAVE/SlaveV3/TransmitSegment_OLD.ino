@@ -1,14 +1,16 @@
-void TransmitSegment(){
+void TransmitSegment_OLD(){
   //Check to see if new picture has been taken
   if (lastPicNum != latestPicNum){
     //resets segment count
     segment = 1;
-    transLength_2 = transLength_1;
   }
 
   //Selects file to transmit
   strcpy(readName, fileName);
-
+  readName[0] = '0' + latestPicNum / 10;
+  readName[1] = '0' + latestPicNum % 10;
+  readName[3] = '0' + segment / 10;
+  readName[4] = '0' + segment % 10;
 
   //Opens File Segment
   File readFile;
@@ -22,18 +24,10 @@ void TransmitSegment(){
     Serial.print(numSegments, DEC);
     Serial.print(",");
     //while there is data remaining in segment
-
-    /////////////////////////////////////////
-    transStartBit = (segment - 1) * imgPacketSize;
-    int pl = min (imgPacketSize, transLength_2);
-    transEndBit = transStartBit + pl;
-    
-    readFile.seek(transStartBit);
-   for ( int b = transStartBit; b < transEndBit ; b++) {
+    while ( readFile.available() ){
+      //writes byte of data to serial in HEX
       Serial.print(readFile.read(), HEX);
-   }
-   transLength_2 -= imgPacketSize;
-    //////////////////////////////////////////
+    }
     Serial.print("\n");
     //closes the file
     readFile.close();

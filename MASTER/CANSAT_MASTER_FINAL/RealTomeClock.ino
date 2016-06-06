@@ -1,13 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////**************RTC functions below**************************************/////////////////////
-
+/*
  // Used to Convert normal decimal numbers to binary coded decimal
 byte decToBcd(byte val)        {return ( (val/10*16) + (val%10) );}
-
 // Used to Convert binary coded decimal to normal decimal numbers
 byte bcdToDec(byte val)        {return ( (val/16*10) + (val%16) );}
-
-
 unsigned long geta_time(){
   byte second, minute, hour;
  // Reset the register pointer
@@ -19,19 +16,21 @@ unsigned long geta_time(){
  minute     = bcdToDec(Wire.read());
  hour       = bcdToDec(Wire.read() & 0x3f);  // Need to change this if 12 hour am/pm
  
- /*Serial.print("The Time is: ");
- Serial.print(hour); Serial.print(":");
- Serial.print(minute); Serial.print(":");
- Serial.println(second);
- */
+ //Serial.print("The Time is: ");
+ //Serial.print(hour); Serial.print(":");
+ //Serial.print(minute); Serial.print(":");
+ //Serial.println(second);
  return((hour * 60 * 60) + (minute * 60) + (second));
 }
-
+*/
 void UpdateMissionTime (){
   int e;
-  EEPROM.get(MissionTimeaddr, e);
-  MissionTime = e/26;
-  EEPROM.put(MissionTimeaddr,e+1);
+  EEPROM.get(MissionTimeaddr, e); delay (100);
+  e=e+1;
+  MissionTime = PacketCount;
+  if (e >= 32677) e=0;
+  EEPROM.update(MissionTimeaddr,e); delay (100);
+  MissionTime = (int)e;
 
   
 }

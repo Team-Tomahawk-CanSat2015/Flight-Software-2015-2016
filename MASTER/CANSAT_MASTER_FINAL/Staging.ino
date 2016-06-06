@@ -45,6 +45,7 @@ void UpdateStaging (){
     break;
   }
   #ifdef USE_INTEEPROM
-  EEPROM.put(EEPROM_StageAdress, StageNumber); //Save stage back
+  EEPROM.update(EEPROM_StageAdress, StageNumber); //Save stage back
+  Serial.println(StageNumber);
   #endif USE_INTEEPROM
 }

@@ -1,5 +1,5 @@
 /*This is the Cansat Flight software for 2015/2016.
- * AD lucem MUTAFUKA!!
+ * AD lucem!!
  */
 //Libaries
 #include <SFE_BMP180.h>
@@ -7,6 +7,8 @@
 #include <EEPROM.h>
 #include <Adafruit_GPS.h> 
 #include <SoftwareSerial.h>
+#include <SPI.h>
+#include <SD.h>
 
 SoftwareSerial mySerial(7, 8); // RX, TX
 Adafruit_GPS GPS(&mySerial); 
@@ -42,12 +44,13 @@ bool NichromeActive = false;
 int NichromeActiveCount = 0;
 int NichromeBurnDuration = 15;
 
-unsigned long PreviousSendTime = 0;
+unsigned long PreviousSendTime=0;
 byte StageNumber;
-int ReleaseAltitude = 450; //450 meters
+byte ReleaseAltitudeaddr = 99;
+int ReleaseAltitude = 450;
 int GroundAproximationAltitude = 50; //50meters 
-int AltitudeFilterOffset = 3;
-unsigned long MissionTimeaddr = 13 + sizeof (unsigned long);
+int AltitudeFilterOffset=3;
+byte MissionTimeaddr= 199;
 /*
 //TELEMETERY FORMAT
  * 1. Team ID.
@@ -69,9 +72,7 @@ unsigned long MissionTimeaddr = 13 + sizeof (unsigned long);
 
 void setup() {
   SetupNichrome();//Initialize NichromePin
-  
   Serial.begin(19200); //Begin Serial
-  delay(100);
 
   //Initialize BMP 180 Pressure and Temperature sensor
   Wire.begin();
@@ -96,8 +97,12 @@ void setup() {
   pinMode(SnapshotPin, OUTPUT);
   digitalWrite(SnapshotPin, LOW); 
 
-  //Initialize mission timer
-  //EEPROM_writeAnything(MissionTimeaddr,0);
+
+
+  //Release altitude
+  EEPROM.get(ReleaseAltitudeaddr, ReleaseAltitude);
+  //Serial.print("Release Altitude");Serial.println(ReleaseAltitude);
+  
 }
 
 void loop() {
@@ -105,6 +110,7 @@ void loop() {
   UpdateStaging();
 
   if(millis()-PreviousSendTime>1000){
+    UpdateMissionTime();
     digitalWrite(CommunicationPin,HIGH);
     SendTelemetery ();
     SaveTelemetery(); 
@@ -141,11 +147,10 @@ void SendTelemetery(){ //To compile and Send Telemetery on Main Serial
 }
 
 void UpdateTelemetery (){ //Updates all sensor data that are required for telemetery
-  UpdateBMP180();
-  UpdateMissionTime();
-  UpdatePitotSensor();
-  UpdateBatteryVoltage();
-  UpdateGPSData();
+  //UpdateBMP180();
+  //UpdatePitotSensor();
+  //UpdateBatteryVoltage();
+  //UpdateGPSData();
 }
 
 void PerformRadioTask(){ //Performs Tasks Recived of serial which is connected to Radio
@@ -162,6 +167,17 @@ void PerformRadioTask(){ //Performs Tasks Recived of serial which is connected t
   else if (RadioRecieve.indexOf("@") != -1){//Take snap shot command recieved
     Buzzer_Command();
   }
+   else if (RadioRecieve.indexOf("^") != -1){//Adjust release altitude
+    ReleaseAltitude = RadioRecieve.substring(RadioRecieve.indexOf("^") + 1).toFloat();
+    EEPROM.update(ReleaseAltitudeaddr,ReleaseAltitude);
+    EEPROM.get(ReleaseAltitudeaddr, ReleaseAltitude);
+    Serial.print("Release Altitude = ");Serial.println(ReleaseAltitude);    
+  }
+  else if (RadioRecieve.indexOf("+") != -1){//Take snap shot command recieved
+    SendLatestFileSD();
+  }
+
+  
   Serial.println (RadioRecieve);
     
   

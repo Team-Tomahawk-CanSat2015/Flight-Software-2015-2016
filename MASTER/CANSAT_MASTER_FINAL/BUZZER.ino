@@ -14,7 +14,7 @@ void Buzzer(){
 void Buzzer_feedback(){
   pinMode(BuzzerPin, OUTPUT);
   tone (BuzzerPin, 262);
-  delay (800);
+  delay (500);
   noTone (BuzzerPin);
   pinMode(BuzzerPin, INPUT);
 }

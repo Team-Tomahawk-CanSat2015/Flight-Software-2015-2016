@@ -5,18 +5,21 @@
 #include <SFE_BMP180.h>
 #include <Wire.h> 
 #include <EEPROM.h>
-#include <Adafruit_GPS.h> 
 #include <SoftwareSerial.h>
 #include <SPI.h>
 #include <SD.h>
+//#include <Adafruit_GPS.h> 
+#include <Arduino.h>
 
-SoftwareSerial mySerial(7, 8); // RX, TX
-Adafruit_GPS GPS(&mySerial); 
-#define GPSECHO  true 
+SoftwareSerial GpsSerial(7, 8); // RX, TX
+#include "AndrewsGPS.h"
+
+
 
 
 
 //Marcos
+#define GPSECHO  true 
 #define USE_INTEEPROM //To activate Internal EEPROM, //Commented out to preserve write cycle
 #define USE_EXTEEPROM //To activate Internal EEPROM, //Commented out to preserve write cycle
 #define TEAMID 6643
@@ -79,7 +82,9 @@ void setup() {
   initialize_BMP180();
 
   //Initialize GPS
-  setupGPS();
+  GpsSerial.begin(9600);
+  GpsSerial.setTimeout(400);
+  //setupGPS();
 
   //Setup EEPROM logging
   //eeAddress_W = 0; //To Start From The Begining, Use When testing
@@ -111,12 +116,10 @@ void loop() {
 
   if(millis()-PreviousSendTime>1000){
     UpdateMissionTime();
-    digitalWrite(CommunicationPin,HIGH);
-    SendTelemetery ();
+    SendTelemetery (true);
     SaveTelemetery(); 
     PreviousSendTime=millis();
     ++NichromeActiveCount;
-    digitalWrite(CommunicationPin,LOW);
     if (MissionTime - SensorData[10] > 10){digitalWrite(SnapshotPin, LOW); }
   }
   
@@ -129,7 +132,7 @@ void loop() {
 /***********************************
  * USER DEFINED FUNCTIONS ARE BELOW*
  * *********************************/
-void SendTelemetery(){ //To compile and Send Telemetery on Main Serial
+void SendTelemetery(bool linebreak){ //To compile and Send Telemetery on Main Serial
   Serial.print(TEAMID); Serial.print(",");
   Serial.print(MissionTime);Serial.print(",");
   Serial.print(++PacketCount);Serial.print(",");
@@ -142,15 +145,16 @@ void SendTelemetery(){ //To compile and Send Telemetery on Main Serial
        Serial.print(SensorData[i],3);Serial.print(",");
      }
   }
-  Serial.println();
+  if (linebreak)Serial.println();
     
 }
 
 void UpdateTelemetery (){ //Updates all sensor data that are required for telemetery
-  //UpdateBMP180();
-  //UpdatePitotSensor();
-  //UpdateBatteryVoltage();
-  //UpdateGPSData();
+  UpdateBMP180();
+  UpdatePitotSensor();
+  UpdateBatteryVoltage();
+  //UpdateGPSData2();
+   callGPS(&gpsData);
 }
 
 void PerformRadioTask(){ //Performs Tasks Recived of serial which is connected to Radio
@@ -168,10 +172,10 @@ void PerformRadioTask(){ //Performs Tasks Recived of serial which is connected t
     Buzzer_Command();
   }
    else if (RadioRecieve.indexOf("^") != -1){//Adjust release altitude
-    ReleaseAltitude = RadioRecieve.substring(RadioRecieve.indexOf("^") + 1).toFloat();
+    ReleaseAltitude = RadioRecieve.substring(1).toFloat();
     EEPROM.update(ReleaseAltitudeaddr,ReleaseAltitude);
     EEPROM.get(ReleaseAltitudeaddr, ReleaseAltitude);
-    Serial.print("Release Altitude = ");Serial.println(ReleaseAltitude);    
+    //Serial.print("Release Altitude = ");Serial.println(ReleaseAltitude);    
   }
   else if (RadioRecieve.indexOf("+") != -1){//Take snap shot command recieved
     SendLatestFileSD();

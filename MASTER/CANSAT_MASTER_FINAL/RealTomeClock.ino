@@ -25,11 +25,12 @@ unsigned long geta_time(){
 */
 void UpdateMissionTime (){
   int e;
-  EEPROM.get(MissionTimeaddr, e); delay (100);
+  intEEPROM_readAnything(MissionTimeaddr, e);
   e=e+1;
   MissionTime = PacketCount;
   if (e >= 32677) e=0;
-  EEPROM.update(MissionTimeaddr,e); delay (100);
+  intEEPROM_writeAnything(MissionTimeaddr,e);
+  //Serial.println(e);
   MissionTime = (int)e;
 
   

@@ -1,7 +1,3 @@
-//void setup(){} 
-
-//void loop(){Buzzer();}
-
 void Buzzer(){
   pinMode(BuzzerPin, OUTPUT);
   tone (BuzzerPin, 262);

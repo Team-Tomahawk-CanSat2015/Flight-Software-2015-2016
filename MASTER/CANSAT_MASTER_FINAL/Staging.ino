@@ -8,7 +8,8 @@ void UpdateStaging (){
     case(1):
         //Just Transmits data, Nothing secial here
       //Transition condition, If altitude ever exceeds release altitude go to next stage
-      if (SensorData[0]>ReleaseAltitude && abs(SensorData[0]-ReleaseAltitude)>AltitudeFilterOffset){
+      //if (SensorData[0]>ReleaseAltitude && abs(SensorData[0]-ReleaseAltitude)>AltitudeFilterOffset){
+      if (pre>ReleaseAltitude && abs(pre-ReleaseAltitude)>AltitudeFilterOffset){
         ++StageNumber;
       }
     break;
@@ -16,7 +17,7 @@ void UpdateStaging (){
     //.STAGE 2. Transition Stage:: Stage tasks: Do nothing
     case(2): 
       //Transition condition, If altitude ever goes below release altitude Burn that Nichrome
-      if (SensorData[0]<ReleaseAltitude && abs(SensorData[0]-ReleaseAltitude)>AltitudeFilterOffset){
+      if (pre<ReleaseAltitude && abs(pre-ReleaseAltitude)>AltitudeFilterOffset){
         ++StageNumber;
         NichromeBurnBaBBY();
         //TakePicture();
@@ -27,7 +28,7 @@ void UpdateStaging (){
     //.STAGE 3. second Below 400m again ,Released stage
     case(3): 
       //Transition condition, If altitude ever exceeds release altitude
-      if (abs(SensorData[0]) < GroundAproximationAltitude ){
+      if (abs(pre) < GroundAproximationAltitude ){
         ++StageNumber;
       }
     break;

@@ -1,8 +1,9 @@
 void SendLatestFileSD (){
+  //Serial.println("ss");
   char fileName[16];
   File myFile;
 
-   if (!SD.begin(10)) {
+   if (!SD.begin(8)) {
     //Serial.println("Card failed, or not present");
     return;
   } 
@@ -23,7 +24,7 @@ void SendLatestFileSD (){
     // read from the file until there's nothing else in it:
     unsigned long datacount=0;
     while (myFile.available()) {
-      if (datacount%1900 == 0){
+      if (datacount%2000 == 0){
         if (datacount!=0)Serial.println();
         UpdateTelemetery ();
         UpdateMissionTime();
@@ -42,6 +43,9 @@ void SendLatestFileSD (){
   }
   
   SD.end();//You need to change your libary to the cansat SD libary to include this function
+   pinMode(8, INPUT);for (int i=0;i<=13; ++i){pinMode(i, INPUT);}
   //Serial.println ("END");
+
+  snapedapic = false;
 
 }

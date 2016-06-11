@@ -19,7 +19,6 @@ SoftwareSerial GpsSerial(7, 8); // RX, TX
 
 
 //Marcos
-#define GPSECHO  true 
 #define USE_INTEEPROM //To activate Internal EEPROM, //Commented out to preserve write cycle
 #define USE_EXTEEPROM //To activate Internal EEPROM, //Commented out to preserve write cycle
 #define TEAMID 6643
@@ -54,6 +53,8 @@ int ReleaseAltitude = 450;
 int GroundAproximationAltitude = 50; //50meters 
 int AltitudeFilterOffset=3;
 byte MissionTimeaddr= 199;
+bool snapedapic = false;
+int SDFreeForMaster = 6;
 /*
 //TELEMETERY FORMAT
  * 1. Team ID.
@@ -82,9 +83,7 @@ void setup() {
   initialize_BMP180();
 
   //Initialize GPS
-  GpsSerial.begin(9600);
-  GpsSerial.setTimeout(400);
-  //setupGPS();
+  setupGPS_2();
 
   //Setup EEPROM logging
   //eeAddress_W = 0; //To Start From The Begining, Use When testing
@@ -92,17 +91,17 @@ void setup() {
   //extEEPROMRead(2*900);while (1==1){}  //If you want to read first 1000 digits in External EEPROM
   SaveTelemetery();SaveTelemetery();
   
-
   //Buzzer FeedBack
   Buzzer_feedback(); 
- 
-
 
   //Setup SnapSHot Pin
   pinMode(SnapshotPin, OUTPUT);
-  digitalWrite(SnapshotPin, LOW); 
-
-
+  digitalWrite(SnapshotPin, LOW);
+  pinMode(SDFreeForMaster, INPUT);
+   
+  //Initialize SD
+  pinMode(8, INPUT);
+  for (int i=0;i<=13; ++i){pinMode(i, INPUT);}
 
   //Release altitude
   EEPROM.get(ReleaseAltitudeaddr, ReleaseAltitude);
@@ -114,13 +113,14 @@ void loop() {
   UpdateTelemetery ();
   UpdateStaging();
 
-  if(millis()-PreviousSendTime>1000){
+  if(millis()-PreviousSendTime>=1000){
+    PreviousSendTime=millis();
     UpdateMissionTime();
     SendTelemetery (true);
     SaveTelemetery(); 
-    PreviousSendTime=millis();
     ++NichromeActiveCount;
     if (MissionTime - SensorData[10] > 10){digitalWrite(SnapshotPin, LOW); }
+    if (MissionTime - SensorData[10]>3&&digitalRead(SDFreeForMaster)==HIGH&&snapedapic==true){SendLatestFileSD();}//if (MissionTime-SensorData[10]>40&&snapedapic==true){SendLatestFileSD(); }
   }
   
   if (Serial.available()){PerformRadioTask();}
@@ -132,12 +132,17 @@ void loop() {
 /***********************************
  * USER DEFINED FUNCTIONS ARE BELOW*
  * *********************************/
+ float pre;
 void SendTelemetery(bool linebreak){ //To compile and Send Telemetery on Main Serial
   Serial.print(TEAMID); Serial.print(",");
   Serial.print(MissionTime);Serial.print(",");
   Serial.print(++PacketCount);Serial.print(",");
+
+  pre = ((pow((SensorData[1]/101300.0), 1.0/5.2561) -1.0)/(-6.8735*pow(10.0,-6.0)));
+  pre =  (pre*0.305) - 500;
+  Serial.print (pre); Serial.print(",");
   
-  for (int i=0; i<SensorDataSize; ++i){
+  for (int i=1; i<SensorDataSize; ++i){
     if (i==5||i==6||i==7 ){ //Print to 6 decimal places for GPS presicion
       Serial.print(SensorData[i],8);Serial.print(",");
      }
@@ -153,13 +158,12 @@ void UpdateTelemetery (){ //Updates all sensor data that are required for teleme
   UpdateBMP180();
   UpdatePitotSensor();
   UpdateBatteryVoltage();
-  //UpdateGPSData2();
    callGPS(&gpsData);
 }
 
 void PerformRadioTask(){ //Performs Tasks Recived of serial which is connected to Radio
   SensorData[11] = SensorData[11] + 1.00;
-  SensorData[10] =(float) MissionTime;
+  SensorData[10] = MissionTime;
   String RadioRecieve = Serial.readString();
 
   if (RadioRecieve.indexOf("%") != -1){//Nichrome burn Command recoeved
@@ -172,17 +176,19 @@ void PerformRadioTask(){ //Performs Tasks Recived of serial which is connected t
     Buzzer_Command();
   }
    else if (RadioRecieve.indexOf("^") != -1){//Adjust release altitude
-    ReleaseAltitude = RadioRecieve.substring(1).toFloat();
-    EEPROM.update(ReleaseAltitudeaddr,ReleaseAltitude);
-    EEPROM.get(ReleaseAltitudeaddr, ReleaseAltitude);
-    //Serial.print("Release Altitude = ");Serial.println(ReleaseAltitude);    
+   intEEPROM_writeAnything(MissionTimeaddr,0);
+    ReleaseAltitude = RadioRecieve.toFloat();
+    intEEPROM_writeAnything(ReleaseAltitudeaddr,ReleaseAltitude);
+    //intEEPROM_readAnything(ReleaseAltitudeaddr, ReleaseAltitude);
+    //Serial.print("Release Altitude = ");
+    Serial.print(ReleaseAltitude);    
   }
   else if (RadioRecieve.indexOf("+") != -1){//Take snap shot command recieved
     SendLatestFileSD();
   }
 
   
-  Serial.println (RadioRecieve);
+  //Serial.println (RadioRecieve);
     
   
   }
@@ -201,9 +207,10 @@ void SaveTelemetery(){ //Compiles and Saves Telemetery data to External EEPROM
   }
 
  void UpdateBatteryVoltage(){ //Battery Voltage divider measurment Sensor Calculation
-   float R1 = 7500;
-   float R2 = 10000;
-   SensorData[4] =  ((analogRead(VoltagePin)/1024.00)*(R1+R2)* 5.00)/R2;
+   //float R1 = 7500;
+   //float R2 = 10000;
+   //SensorData[4] =  ((analogRead(VoltagePin)/1024.00)*(R1+R2)* 5.00)/R2;
+   SensorData[4] =  ((analogRead(VoltagePin)/1024.00)*(7500+10000)* 5.00)/10000;
  }
 
 
@@ -222,12 +229,16 @@ void SaveTelemetery(){ //Compiles and Saves Telemetery data to External EEPROM
   SensorData[10] =(float) MissionTime;
   NichromeActiveCount = 0;
   digitalWrite(NichromeBurnPin,LOW);
+  pinMode(NichromeBurnPin,INPUT);
+  pinMode(NichromeBurnPin,OUTPUT);
   NichromeActive = false;
   Buzzer_Command();
   }
 
+
   void TakeSnapshot(){
     digitalWrite(SnapshotPin, HIGH); 
+    snapedapic = true;
     }
 
 

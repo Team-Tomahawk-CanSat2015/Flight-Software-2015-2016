@@ -1,8 +1,20 @@
 void snapper (){
+  if (!SD.begin(5)) {
+    Serial.println("Card failed, or not present");
+    // don't do anything more:
+    return;
+  }  
+
   
+  // Try to locate the camera
+  if (cam.begin()) {
+    Serial.println("Camera Found:");
+  } else {
+    Serial.println("No camera found?");
+    return;
+  }
   Serial.println("VC0706 Camera snapshot test");
   
-
   // Print out the camera version information (optional)
   char *reply = cam.getVersion();
   if (reply == 0) {
@@ -35,18 +47,18 @@ void snapper (){
   else 
     Serial.println("Picture taken!");
   
-  // Create an image with the name IMAGExx.JPG
+  // Create an image with the name 00_00.JPG
   char filename[13];
-  strcpy(filename, "IMAGE00.JPG");
-  for (int i = 0; i < 100; i++) {
-    filename[5] = '0' + i/10;
-    filename[6] = '0' + i%10;
+  strcpy(filename, "00_00.JPG");
+  for (int i = 0; i < 200; i++) {
+    filename[0] = '0' + i/10;
+    filename[1] = '0' + i%10;
     // create if does not exist, do not open existing, write, sync after write
     if (! SD.exists(filename)) {
       break;
     }
   }
-  
+  Serial.println (filename);
   // Open the file for writing
   File imgFile = SD.open(filename, FILE_WRITE);
 
@@ -78,6 +90,7 @@ void snapper (){
   time = millis() - time;
   Serial.println("done!");
   Serial.print(time); Serial.println(" ms elapsed");
-  
+
+  SD.end();
   
   }

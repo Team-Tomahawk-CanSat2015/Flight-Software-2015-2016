@@ -24,14 +24,10 @@ unsigned long geta_time(){
 }
 */
 void UpdateMissionTime (){
-  int e;
-  intEEPROM_readAnything(MissionTimeaddr, e);
-  e=e+1;
-  MissionTime = PacketCount;
-  if (e >= 32677) e=0;
-  intEEPROM_writeAnything(MissionTimeaddr,e);
-  //Serial.println(e);
-  MissionTime = (int)e;
+  intEEPROM_readAnything(MissionTimeaddr, MissionTime);
+  //MissionTime =(int)MissionTime + ((int)millis()/1000);
+  ++MissionTime;
+  intEEPROM_writeAnything(MissionTimeaddr,MissionTime);
 
   
 }

@@ -56,8 +56,15 @@ double P,p0,a;
 
 void UpdateBMP180(){
   SensorData[1] = 100.00*(float)getPressure(); //Update pressure;
-  SensorData[0] = (float)BMP180.altitude(SensorData[1]/100,baselineAltitude); //Update Reltive Altitude
-  SensorData[3] = (float)T;
+  //SensorData[0] = (float)BMP180.altitude(SensorData[1]/100,baselineAltitude); //Update Reltive Altitude
+  SensorData[3] = (float)T;//Temp
+
+  //
+  
+  //SensorData[0] = (pow((SensorData[1]/101300.0), 1.0/5.2561) -1.0)/(-6.8735*pow(10.0,-6.0));
+  //SensorData[0]  = 9;
+
+  
 }
 
 

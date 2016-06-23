@@ -28,11 +28,15 @@ void SendLatestFileSD (){
         if (datacount!=0)Serial.println();
         UpdateTelemetery ();
         UpdateMissionTime();
-        SendTelemetery (false);
+        SendTelemetery(false);
         SaveTelemetery(); 
         if (datacount==0) Serial.print(fileName);
         }
-      Serial.print(myFile.read(), HEX);
+        byte h = myFile.read();
+        if ((int)h < 16){
+          Serial.print(0, DEC);
+        }
+      Serial.print(h,HEX);
       ++datacount;
     }
     // close the file:

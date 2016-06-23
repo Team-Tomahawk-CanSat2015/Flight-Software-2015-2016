@@ -139,7 +139,7 @@ void SendTelemetery(bool linebreak){ //To compile and Send Telemetery on Main Se
   Serial.print(++PacketCount);Serial.print(",");
 
   pre = ((pow((SensorData[1]/101300.0), 1.0/5.2561) -1.0)/(-6.8735*pow(10.0,-6.0)));
-  pre =  (pre*0.305) - 500;
+  pre =  (pre*0.305) - 450;
   Serial.print (pre); Serial.print(",");
   
   for (int i=1; i<SensorDataSize; ++i){
